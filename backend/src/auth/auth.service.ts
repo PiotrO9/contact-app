@@ -4,38 +4,29 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
+import { CookieOptions, Request, Response } from 'express';
 
-type GoogleSignInUrlResponse = {
-  url: string;
-};
+type CookieMethods = NonNullable<
+  Parameters<typeof createServerClient>[2]
+>['cookies'];
 
 @Injectable()
 export class AuthService {
   constructor(private readonly configService: ConfigService) {}
 
   async createGoogleSignInUrl(
-    redirectTo?: string,
-  ): Promise<GoogleSignInUrlResponse> {
-    const supabaseUrl = this.getRequiredConfig('SUPABASE_URL');
-    const supabaseKey = this.getRequiredConfig('SUPABASE_PUBLISHABLE_KEY');
-    const resolvedRedirectTo = this.resolveRedirectTo(redirectTo);
-
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-        persistSession: false,
-      },
-    });
+    request: Request,
+    response: Response,
+  ): Promise<string> {
+    const supabase = this.createSupabaseServerClient(request, response);
+    const backendUrl = this.getRequestOrigin(request);
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: resolvedRedirectTo
-        ? {
-            redirectTo: resolvedRedirectTo,
-          }
-        : undefined,
+      options: {
+        redirectTo: `${backendUrl}/auth/callback`,
+      },
     });
 
     if (error) {
@@ -48,42 +39,118 @@ export class AuthService {
       );
     }
 
-    return { url: data.url };
+    return data.url;
   }
 
-  private resolveRedirectTo(redirectTo?: string): string | undefined {
-    const defaultRedirectTo = this.configService.get<string>(
-      'SUPABASE_AUTH_REDIRECT_TO',
-    );
-    const resolvedRedirectTo = redirectTo ?? defaultRedirectTo;
+  async handleOAuthCallback(
+    code: string | undefined,
+    errorDescription: string | undefined,
+    request: Request,
+    response: Response,
+  ): Promise<string> {
+    const frontendUrl = this.getRequiredConfig('FRONTEND_URL');
 
-    if (!resolvedRedirectTo) {
-      return undefined;
+    if (errorDescription) {
+      return `${frontendUrl}/login?error=${encodeURIComponent(errorDescription)}`;
     }
 
-    const redirectUrl = this.parseUrl(resolvedRedirectTo, 'redirectTo');
-    const allowedOrigins = this.getAllowedRedirectOrigins();
-
-    if (
-      allowedOrigins.length > 0 &&
-      !allowedOrigins.includes(redirectUrl.origin)
-    ) {
-      throw new BadRequestException('redirectTo origin is not allowed');
+    if (!code) {
+      return `${frontendUrl}/login?error=${encodeURIComponent('Missing OAuth code')}`;
     }
 
-    return redirectUrl.toString();
+    const supabase = this.createSupabaseServerClient(request, response);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      return `${frontendUrl}/login?error=${encodeURIComponent(error.message)}`;
+    }
+
+    return frontendUrl;
   }
 
-  private getAllowedRedirectOrigins(): string[] {
-    const configuredOrigins = this.configService.get<string>(
-      'SUPABASE_AUTH_ALLOWED_REDIRECT_ORIGINS',
-    );
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-    const origins = [frontendUrl, ...(configuredOrigins?.split(',') ?? [])];
+  async getCurrentUser(request: Request, response: Response) {
+    const supabase = this.createSupabaseServerClient(request, response);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    return origins
-      .filter((origin): origin is string => Boolean(origin?.trim()))
-      .map((origin) => this.parseUrl(origin.trim(), 'allowed origin').origin);
+    if (error || !user) {
+      return { user: null };
+    }
+
+    const fullName =
+      typeof user.user_metadata?.['full_name'] === 'string'
+        ? user.user_metadata['full_name']
+        : null;
+    const avatarUrl =
+      typeof user.user_metadata?.['avatar_url'] === 'string'
+        ? user.user_metadata['avatar_url']
+        : null;
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: fullName ?? user.email,
+        avatarUrl,
+      },
+    };
+  }
+
+  async signOut(request: Request, response: Response) {
+    const supabase = this.createSupabaseServerClient(request, response);
+    await supabase.auth.signOut();
+
+    return { ok: true };
+  }
+
+  private createSupabaseServerClient(request: Request, response: Response) {
+    return createServerClient(
+      this.getRequiredConfig('SUPABASE_URL'),
+      this.getSupabasePublicKey(),
+      {
+        cookies: this.createCookieMethods(request, response),
+      },
+    );
+  }
+
+  private createCookieMethods(
+    request: Request,
+    response: Response,
+  ): CookieMethods {
+    return {
+      getAll: () =>
+        Object.entries(request.cookies ?? {}).map(([name, value]) => ({
+          name,
+          value: String(value),
+        })),
+      setAll: (cookiesToSet) => {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookie(name, value, this.toExpressCookieOptions(options));
+        });
+      },
+    };
+  }
+
+  private toExpressCookieOptions(options: CookieOptions): CookieOptions {
+    return {
+      ...options,
+      path: options.path ?? '/',
+      sameSite: options.sameSite ?? 'lax',
+      secure: this.configService.get<string>('NODE_ENV') === 'production',
+    };
+  }
+
+  private getRequestOrigin(request: Request): string {
+    const protocol = request.get('x-forwarded-proto') ?? request.protocol;
+    const host = request.get('host');
+
+    if (host) {
+      return `${protocol}://${host}`;
+    }
+
+    return this.getRequiredConfig('BACKEND_URL');
   }
 
   private getRequiredConfig(key: string): string {
@@ -96,11 +163,17 @@ export class AuthService {
     return value;
   }
 
-  private parseUrl(value: string, label: string): URL {
-    try {
-      return new URL(value);
-    } catch {
-      throw new BadRequestException(`${label} must be a valid absolute URL`);
+  private getSupabasePublicKey(): string {
+    const value =
+      this.configService.get<string>('SUPABASE_PUBLISHABLE_KEY') ??
+      this.configService.get<string>('SUPABASE_ANON_KEY');
+
+    if (!value) {
+      throw new InternalServerErrorException(
+        'SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY is not configured',
+      );
     }
+
+    return value;
   }
 }

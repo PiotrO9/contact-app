@@ -1,0 +1,16 @@
+<main class="home-shell">
+  <mat-card class="home-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Jestes zalogowany</mat-card-title>
+      <mat-card-subtitle>{{ displayName() }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p>Sesja Supabase jest aktywna. Mozesz teraz testowac chronione widoki aplikacji.</p>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button matButton="filled" type="button" (click)="signOut()">Wyloguj</button>
+    </mat-card-actions>
+  </mat-card>
+</main>

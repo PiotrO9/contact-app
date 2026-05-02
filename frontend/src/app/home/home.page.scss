@@ -1,0 +1,13 @@
+.home-shell {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(0, 87, 255, 0.09), transparent 32%),
+    var(--mat-sys-surface);
+}
+
+.home-card {
+  width: min(100%, 520px);
+}
