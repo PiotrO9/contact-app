@@ -1,0 +1,52 @@
+@if (user()) {
+  <div class="layout-shell">
+    <mat-toolbar class="layout-toolbar">
+      <div class="brand">
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="Menu"
+          [attr.aria-expanded]="sidebarOpen()"
+          (click)="toggleSidebar()"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span class="brand-mark" aria-hidden="true">
+          <mat-icon>contacts</mat-icon>
+        </span>
+        <span class="brand-title">Kontakty</span>
+      </div>
+
+      <label class="search-box">
+        <mat-icon aria-hidden="true">search</mat-icon>
+        <input
+          type="search"
+          placeholder="Szukaj"
+          aria-label="Szukaj kontaktow"
+          [value]="searchQuery()"
+          (input)="updateSearch($event)"
+        />
+      </label>
+
+      <div class="user-chip" [attr.aria-label]="displayName()">
+        @if (user()?.avatarUrl) {
+          <img [src]="user()?.avatarUrl" [alt]="displayName()" />
+        } @else {
+          <span>{{ displayName().charAt(0).toUpperCase() }}</span>
+        }
+      </div>
+    </mat-toolbar>
+
+    <mat-sidenav-container class="content-shell">
+      <mat-sidenav class="layout-sidebar" mode="side" [opened]="sidebarOpen()">
+        <app-sidebar />
+      </mat-sidenav>
+
+      <mat-sidenav-content class="layout-main">
+        <main class="page-content">
+          <router-outlet />
+        </main>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  </div>
+}

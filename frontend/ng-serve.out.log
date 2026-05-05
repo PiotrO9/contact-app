@@ -165,3 +165,13 @@ Application bundle generation complete. [0.051 seconds] - 2026-05-02T17:09:19.19
 Application bundle generation complete. [0.064 seconds] - 2026-05-02T17:17:58.078Z
 
 Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m[36m16.98 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m       [2m | [22m [36m8.81 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m[2m | [22m[1m25.80 kB[22m
+
+Application bundle generation complete. [0.042 seconds] - 2026-05-02T17:21:19.165Z
+

@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>Usunac kontakt?</h2>
+
+<mat-dialog-content>
+  <p>Kontakt "{{ data.contactName }}" zostanie trwale usuniety.</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton type="button" [mat-dialog-close]="false">Anuluj</button>
+  <button matButton type="button" class="delete-action" [mat-dialog-close]="true">
+    Usun
+  </button>
+</mat-dialog-actions>

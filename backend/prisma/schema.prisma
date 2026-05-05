@@ -12,3 +12,18 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Contact {
+  id         String   @id @default(uuid())
+  userId     String
+  name       String
+  email      String?
+  phone      String?
+  isFavorite Boolean  @default(false)
+  deletedAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, deletedAt])
+}

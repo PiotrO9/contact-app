@@ -1,0 +1,50 @@
+.new-contact-page {
+  max-width: 760px;
+  padding-top: 8px;
+}
+
+.contact-card {
+  border-radius: 24px;
+  border-color: #e0e3e7;
+  box-shadow: none;
+}
+
+.contact-card mat-card-header {
+  padding: 24px 24px 0;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.contact-form {
+  display: grid;
+  gap: 12px;
+  padding: 20px 24px 4px;
+}
+
+.name-fields {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.contact-card mat-card-actions {
+  padding: 8px 24px 20px;
+}
+
+.api-error {
+  margin: 0;
+  color: #c5221f;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@media (max-width: 640px) {
+  .name-fields {
+    grid-template-columns: 1fr;
+  }
+}

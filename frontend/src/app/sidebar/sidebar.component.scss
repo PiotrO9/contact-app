@@ -1,0 +1,145 @@
+.sidebar {
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 16px 30px 16px 10px;
+  color: #3c4043;
+}
+
+.nav-list {
+  display: grid;
+  gap: 4px;
+}
+
+.nav-footer {
+  display: grid;
+  gap: 2px;
+  margin-top: auto;
+}
+
+.label-section {
+  display: grid;
+  gap: 4px;
+  margin-top: 20px;
+}
+
+.section-heading {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 0 14px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  color: #3c4043;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.section-heading button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #3c4043;
+  cursor: pointer;
+}
+
+.section-heading button:hover {
+  background: #e9eef6;
+}
+
+.nav-item {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #3c4043;
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: #e9eef6;
+}
+
+.nav-item.active {
+  background: #c2e7ff;
+  color: #001d35;
+}
+
+.nav-item.primary-action {
+  min-height: 48px;
+  margin-bottom: 10px;
+  background: #0b57d0;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(11, 87, 208, 0.24);
+}
+
+.nav-item.primary-action:hover,
+.nav-item.primary-action.active {
+  background: #0842a0;
+  color: #ffffff;
+}
+
+.nav-item mat-icon {
+  color: currentColor;
+}
+
+.label-item {
+  color: #5f6368;
+}
+
+@media (max-width: 800px) {
+  .sidebar {
+    align-items: center;
+    padding: 10px 8px;
+  }
+
+  .nav-item span {
+    display: none;
+  }
+
+  .label-section {
+    margin-top: 12px;
+  }
+
+  .section-heading {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .section-heading h2 {
+    display: none;
+  }
+
+  .nav-item {
+    width: 52px;
+    grid-template-columns: 1fr;
+    place-items: center;
+    padding: 0;
+  }
+
+  .nav-item.primary-action {
+    margin-bottom: 8px;
+  }
+}

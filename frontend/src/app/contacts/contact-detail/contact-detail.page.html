@@ -1,0 +1,98 @@
+<section class="contact-detail-page">
+  <div class="detail-panel">
+    <div class="detail-actions">
+      <button matButton type="button" class="back-button" (click)="backToContacts()">
+        <mat-icon>arrow_back</mat-icon>
+        Kontakty
+      </button>
+
+      @if (contact(); as contact) {
+        <div class="contact-actions">
+          @if (!isEditing()) {
+            <button matButton type="button" (click)="startEdit(contact)">
+              <mat-icon>edit</mat-icon>
+              Edytuj
+            </button>
+          }
+
+          <button matButton type="button" class="delete-button" (click)="deleteContact(contact)">
+            <mat-icon>delete</mat-icon>
+            Usun
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="state" aria-label="Ladowanie kontaktu">
+        <mat-spinner diameter="36" />
+      </div>
+    } @else if (notFound()) {
+      <div class="state">
+        <mat-icon aria-hidden="true">person_off</mat-icon>
+        <h1>Nie znaleziono kontaktu</h1>
+        <p>Ten kontakt nie istnieje albo nie masz do niego dostepu.</p>
+      </div>
+    } @else if (contact(); as contact) {
+      <header class="detail-header">
+        <span class="avatar" aria-hidden="true">
+          @if (contact.avatarUrl) {
+            <img [src]="contact.avatarUrl" [alt]="contact.name" />
+          } @else {
+            {{ getInitials(contact) }}
+          }
+        </span>
+
+        <div>
+          <h1>{{ contact.name }}</h1>
+          <p>{{ contact.email || contact.phone || 'Brak danych kontaktowych' }}</p>
+        </div>
+      </header>
+
+      <dl class="details-list">
+        <div>
+          <dt>E-mail</dt>
+          <dd>{{ contact.email || '-' }}</dd>
+        </div>
+        <div>
+          <dt>Telefon</dt>
+          <dd>{{ contact.phone || '-' }}</dd>
+        </div>
+      </dl>
+
+      @if (isEditing()) {
+        <form class="edit-form" [formGroup]="form" (ngSubmit)="saveContact(contact)">
+          <h2>Edytuj kontakt</h2>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Imie i nazwisko</mat-label>
+            <input matInput type="text" formControlName="name" />
+            <mat-error>Imie i nazwisko jest wymagane</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>E-mail</mat-label>
+            <input matInput type="email" formControlName="email" />
+            <mat-error>Podaj poprawny adres e-mail</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Numer telefonu</mat-label>
+            <input matInput type="tel" formControlName="phone" />
+          </mat-form-field>
+
+          @if (apiError()) {
+            <p class="api-error" role="alert">{{ apiError() }}</p>
+          }
+
+          <div class="form-actions">
+            <button matButton type="button" (click)="cancelEdit()">Anuluj</button>
+            <button matButton="filled" type="submit" [disabled]="form.invalid || isSubmitting">
+              Zapisz
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </div>
+</section>

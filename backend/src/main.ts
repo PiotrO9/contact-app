@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
@@ -16,6 +17,11 @@ async function bootstrap() {
     .map((origin) => origin.trim());
 
   app.use(cookieParser());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+    }),
+  );
   app.enableCors({
     origin: (origin: string | undefined, callback: CorsOriginCallback) => {
       if (!origin || allowedOrigins.includes(origin)) {

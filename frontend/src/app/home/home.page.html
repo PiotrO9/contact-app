@@ -1,16 +1,30 @@
-<main class="home-shell">
-  <mat-card class="home-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Jestes zalogowany</mat-card-title>
-      <mat-card-subtitle>{{ displayName() }}</mat-card-subtitle>
-    </mat-card-header>
+<section class="contacts-page">
+  <div class="contacts-panel">
+    <header class="contacts-header">
+      <div>
+        <h1>Kontakty</h1>
+      </div>
 
-    <mat-card-content>
-      <p>Sesja Supabase jest aktywna. Mozesz teraz testowac chronione widoki aplikacji.</p>
-    </mat-card-content>
+      <div class="table-actions" aria-label="Akcje listy">
+        <button type="button" aria-label="Importuj">
+          <mat-icon>upload</mat-icon>
+        </button>
+      </div>
+    </header>
 
-    <mat-card-actions align="end">
-      <button matButton="filled" type="button" (click)="signOut()">Wyloguj</button>
-    </mat-card-actions>
-  </mat-card>
-</main>
+    <div class="contacts-table" role="table" aria-label="Kontakty">
+      <div class="table-row table-head" role="row">
+        <span role="columnheader">Imie i nazwisko</span>
+        <span role="columnheader">E-mail</span>
+        <span role="columnheader">Numer telefonu</span>
+        <span role="columnheader">Stanowisko i firma</span>
+      </div>
+
+      <div class="empty-state">
+        <mat-icon aria-hidden="true">person_add</mat-icon>
+        <h2>Brak kontaktow</h2>
+        <p>Dodaj pierwszy kontakt, aby pojawil sie na tej liscie.</p>
+      </div>
+    </div>
+  </div>
+</section>

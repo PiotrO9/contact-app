@@ -1,0 +1,71 @@
+<nav class="sidebar" aria-label="Nawigacja kontaktow">
+  <div class="nav-list">
+    <a
+      class="nav-item primary-action"
+      routerLink="/contacts/new"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      <span>Utworz kontakt</span>
+    </a>
+
+    <a
+      class="nav-item"
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <mat-icon aria-hidden="true">person</mat-icon>
+      <span>Kontakty</span>
+    </a>
+
+    <button class="nav-item" type="button">
+      <mat-icon aria-hidden="true">file_upload</mat-icon>
+      <span>Importuj</span>
+    </button>
+
+    <a
+      class="nav-item"
+      routerLink="/contacts/trash"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <mat-icon aria-hidden="true">delete</mat-icon>
+      <span>Kosz</span>
+    </a>
+
+    <section class="label-section" aria-labelledby="labels-heading">
+      <div class="section-heading">
+        <h2 id="labels-heading">Etykiety</h2>
+        <button type="button" aria-label="Dodaj etykiete" (click)="addLabel()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+        </button>
+      </div>
+
+      @for (label of labels(); track label) {
+        <button class="nav-item label-item" type="button">
+          <mat-icon aria-hidden="true">label</mat-icon>
+          <span>{{ label }}</span>
+        </button>
+      }
+    </section>
+
+    <a
+      class="nav-item"
+      routerLink="/contacts/favorites"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <mat-icon aria-hidden="true">star</mat-icon>
+      <span>Ulubione</span>
+    </a>
+  </div>
+
+  <div class="nav-footer">
+    <button class="nav-item" type="button" (click)="signOut()">
+      <mat-icon aria-hidden="true">logout</mat-icon>
+      <span>Wyloguj</span>
+    </button>
+  </div>
+</nav>

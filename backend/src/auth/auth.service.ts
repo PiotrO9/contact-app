@@ -2,9 +2,11 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { CookieOptions, Request, Response } from 'express';
 
 type CookieMethods = NonNullable<
@@ -105,6 +107,39 @@ export class AuthService {
     return { ok: true };
   }
 
+  async getAuthenticatedUserId(
+    request: Request,
+    response: Response,
+  ): Promise<string> {
+    const bearerToken = this.extractBearerToken(request);
+
+    if (bearerToken) {
+      const supabase = this.createSupabaseAuthClient();
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser(bearerToken);
+
+      if (error || !user) {
+        throw new UnauthorizedException('Invalid Supabase access token');
+      }
+
+      return user.id;
+    }
+
+    const supabase = this.createSupabaseServerClient(request, response);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      throw new UnauthorizedException('Missing Supabase access token');
+    }
+
+    return user.id;
+  }
+
   private createSupabaseServerClient(request: Request, response: Response) {
     return createServerClient(
       this.getRequiredConfig('SUPABASE_URL'),
@@ -113,6 +148,36 @@ export class AuthService {
         cookies: this.createCookieMethods(request, response),
       },
     );
+  }
+
+  private createSupabaseAuthClient() {
+    return createClient(
+      this.getRequiredConfig('SUPABASE_URL'),
+      this.getSupabasePublicKey(),
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+          detectSessionInUrl: false,
+        },
+      },
+    );
+  }
+
+  private extractBearerToken(request: Request): string | null {
+    const authorization = request.get('authorization');
+
+    if (!authorization) {
+      return null;
+    }
+
+    const [scheme, token] = authorization.split(' ');
+
+    if (scheme?.toLowerCase() !== 'bearer' || !token) {
+      throw new UnauthorizedException('Invalid authorization header');
+    }
+
+    return token;
   }
 
   private createCookieMethods(
