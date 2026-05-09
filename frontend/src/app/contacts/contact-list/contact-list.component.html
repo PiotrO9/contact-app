@@ -36,10 +36,14 @@
             <th mat-header-cell *matHeaderCellDef aria-label="Awatar"></th>
             <td mat-cell *matCellDef="let contact">
               <span class="avatar" aria-hidden="true">
+                {{ getInitials(contact) }}
                 @if (contact.avatarUrl) {
-                  <img [src]="contact.avatarUrl" [alt]="contact.name" />
-                } @else {
-                  {{ getInitials(contact) }}
+                  <img
+                    [src]="contact.avatarUrl"
+                    [alt]="contact.name"
+                    referrerpolicy="no-referrer"
+                    (error)="hideBrokenAvatar($event)"
+                  />
                 }
               </span>
             </td>

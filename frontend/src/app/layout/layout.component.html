@@ -29,10 +29,14 @@
       </label>
 
       <div class="user-chip" [attr.aria-label]="displayName()">
+        <span>{{ displayName().charAt(0).toUpperCase() }}</span>
         @if (user()?.avatarUrl) {
-          <img [src]="user()?.avatarUrl" [alt]="displayName()" />
-        } @else {
-          <span>{{ displayName().charAt(0).toUpperCase() }}</span>
+          <img
+            [src]="user()?.avatarUrl"
+            [alt]="displayName()"
+            referrerpolicy="no-referrer"
+            (error)="hideBrokenAvatar($event)"
+          />
         }
       </div>
     </mat-toolbar>

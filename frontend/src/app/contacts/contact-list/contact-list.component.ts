@@ -189,6 +189,13 @@ export class ContactListComponent implements OnInit {
     return initials || '?';
   }
 
+  protected hideBrokenAvatar(event: Event): void {
+    const image = event.target as HTMLImageElement;
+
+    image.classList.add('is-hidden');
+    image.setAttribute('aria-hidden', 'true');
+  }
+
   private normalizeSearchText(value: string): string {
     return value
       .normalize('NFD')

@@ -36,4 +36,11 @@ export class LayoutComponent {
 
     this.searchService.setQuery(input.value);
   }
+
+  protected hideBrokenAvatar(event: Event): void {
+    const image = event.target as HTMLImageElement;
+
+    image.classList.add('is-hidden');
+    image.setAttribute('aria-hidden', 'true');
+  }
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -31,6 +32,7 @@ export class ContactDetailPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly title = inject(Title);
 
   protected readonly contact = signal<Contact | null>(null);
   protected readonly isLoading = signal(true);
@@ -68,7 +70,13 @@ export class ContactDetailPage implements OnInit {
         }),
         finalize(() => this.isLoading.set(false)),
       )
-      .subscribe((contact) => this.contact.set(contact));
+      .subscribe((contact) => {
+        this.contact.set(contact);
+
+        if (contact) {
+          this.title.setTitle(`${contact.name} | Kontakty`);
+        }
+      });
   }
 
   protected startEdit(contact: Contact): void {
@@ -108,6 +116,7 @@ export class ContactDetailPage implements OnInit {
         next: (updatedContact) => {
           this.contact.set(updatedContact);
           this.isEditing.set(false);
+          this.title.setTitle(`${updatedContact.name} | Kontakty`);
         },
         error: (error: unknown) => this.apiError.set(this.getErrorMessage(error)),
       });
@@ -139,6 +148,13 @@ export class ContactDetailPage implements OnInit {
       .join('');
 
     return initials || '?';
+  }
+
+  protected hideBrokenAvatar(event: Event): void {
+    const image = event.target as HTMLImageElement;
+
+    image.classList.add('is-hidden');
+    image.setAttribute('aria-hidden', 'true');
   }
 
   private emptyToNull(value: string): string | null {

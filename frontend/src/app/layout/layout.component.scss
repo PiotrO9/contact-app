@@ -115,6 +115,7 @@
 }
 
 .user-chip {
+  position: relative;
   width: 36px;
   height: 36px;
   display: grid;
@@ -130,10 +131,16 @@
 }
 
 .user-chip img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
+}
+
+.user-chip img.is-hidden {
+  display: none;
 }
 
 .page-content {

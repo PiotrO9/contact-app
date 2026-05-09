@@ -11,6 +11,7 @@ export const routes: Routes = [
     path: 'login',
     component: LoginPage,
     canActivate: [loginGuard],
+    title: 'Logowanie | Kontakty',
   },
   {
     path: '',
@@ -21,28 +22,34 @@ export const routes: Routes = [
         path: '',
         component: ContactListComponent,
         pathMatch: 'full',
+        title: 'Kontakty',
       },
       {
         path: 'contacts',
         component: ContactListComponent,
+        title: 'Kontakty',
       },
       {
         path: 'contacts/favorites',
         component: ContactListComponent,
         data: { favoritesOnly: true },
+        title: 'Ulubione kontakty | Kontakty',
       },
       {
         path: 'contacts/trash',
         component: ContactListComponent,
         data: { trashOnly: true },
+        title: 'Kosz | Kontakty',
       },
       {
         path: 'contacts/new',
         component: NewContactPage,
+        title: 'Nowy kontakt | Kontakty',
       },
       {
         path: 'contacts/:id',
         component: ContactDetailPage,
+        title: 'Szczegoly kontaktu | Kontakty',
       },
     ],
   },
