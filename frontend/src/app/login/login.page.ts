@@ -8,7 +8,7 @@ import { AuthService } from '../auth/auth.service';
   selector: 'app-login-page',
   imports: [MatButtonModule, MatCardModule],
   templateUrl: './login.page.html',
-  styleUrl: './login.page.scss',
+  styleUrl: './login.page.css',
 })
 export class LoginPage {
   private readonly authService = inject(AuthService);

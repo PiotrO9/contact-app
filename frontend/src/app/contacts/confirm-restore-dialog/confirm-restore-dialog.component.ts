@@ -10,7 +10,7 @@ export type ConfirmRestoreDialogData = {
   selector: 'app-confirm-restore-dialog',
   imports: [MatButtonModule, MatDialogModule],
   templateUrl: './confirm-restore-dialog.component.html',
-  styleUrl: './confirm-restore-dialog.component.scss',
+  styleUrl: './confirm-restore-dialog.component.css',
 })
 export class ConfirmRestoreDialogComponent {
   protected readonly data = inject<ConfirmRestoreDialogData>(MAT_DIALOG_DATA);

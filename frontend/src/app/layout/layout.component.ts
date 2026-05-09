@@ -11,7 +11,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   selector: 'app-layout',
   imports: [RouterOutlet, MatIconModule, MatSidenavModule, MatToolbarModule, SidebarComponent],
   templateUrl: './layout.component.html',
-  styleUrl: './layout.component.scss',
+  styleUrl: './layout.component.css',
 })
 export class LayoutComponent {
   private readonly authService = inject(AuthService);

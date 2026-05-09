@@ -9,7 +9,7 @@ const labelsStorageKey = 'contact-app-labels';
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive, MatIconModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss',
+  styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent {
   protected readonly labels = signal<string[]>(this.loadLabels());

@@ -10,7 +10,7 @@ export type ConfirmDeleteDialogData = {
   selector: 'app-confirm-delete-dialog',
   imports: [MatButtonModule, MatDialogModule],
   templateUrl: './confirm-delete-dialog.component.html',
-  styleUrl: './confirm-delete-dialog.component.scss',
+  styleUrl: './confirm-delete-dialog.component.css',
 })
 export class ConfirmDeleteDialogComponent {
   protected readonly data = inject<ConfirmDeleteDialogData>(MAT_DIALOG_DATA);

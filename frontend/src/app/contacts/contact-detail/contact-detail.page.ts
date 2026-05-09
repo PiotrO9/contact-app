@@ -25,7 +25,7 @@ import { Contact, ContactsApiService } from '../contacts-api.service';
     MatProgressSpinnerModule,
   ],
   templateUrl: './contact-detail.page.html',
-  styleUrl: './contact-detail.page.scss',
+  styleUrl: './contact-detail.page.css',
 })
 export class ContactDetailPage implements OnInit {
   private readonly contactsApi = inject(ContactsApiService);

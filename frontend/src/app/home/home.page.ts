@@ -5,6 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-home-page',
   imports: [MatIconModule],
   templateUrl: './home.page.html',
-  styleUrl: './home.page.scss',
+  styleUrl: './home.page.css',
 })
 export class HomePage {}

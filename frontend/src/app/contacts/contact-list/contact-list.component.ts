@@ -21,7 +21,7 @@ import { Contact, ContactsApiService } from '../contacts-api.service';
     MatTableModule,
   ],
   templateUrl: './contact-list.component.html',
-  styleUrl: './contact-list.component.scss',
+  styleUrl: './contact-list.component.css',
 })
 export class ContactListComponent implements OnInit {
   private readonly contactsApi = inject(ContactsApiService);

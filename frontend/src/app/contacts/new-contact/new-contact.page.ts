@@ -21,7 +21,7 @@ import { ContactsApiService } from '../contacts-api.service';
     MatInputModule,
   ],
   templateUrl: './new-contact.page.html',
-  styleUrl: './new-contact.page.scss',
+  styleUrl: './new-contact.page.css',
 })
 export class NewContactPage {
   protected readonly form = new FormGroup({
