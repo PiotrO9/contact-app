@@ -76,6 +76,10 @@
           <dt>Telefon</dt>
           <dd>{{ contact.phone || '-' }}</dd>
         </div>
+        <div>
+          <dt>Notatka</dt>
+          <dd class="note-value">{{ contact.note || '-' }}</dd>
+        </div>
       </dl>
 
       @if (isEditing()) {
@@ -97,6 +101,11 @@
           <mat-form-field appearance="outline">
             <mat-label>Numer telefonu</mat-label>
             <input matInput type="tel" formControlName="phone" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Notatka</mat-label>
+            <textarea matInput formControlName="note" rows="4"></textarea>
           </mat-form-field>
 
           @if (apiError()) {

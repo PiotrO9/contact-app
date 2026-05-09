@@ -39,6 +39,11 @@
           <input matInput type="tel" formControlName="phone" />
         </mat-form-field>
 
+        <mat-form-field appearance="outline">
+          <mat-label>Notatka</mat-label>
+          <textarea matInput formControlName="note" rows="4"></textarea>
+        </mat-form-field>
+
         @if (apiError()) {
           <p class="api-error" role="alert">{{ apiError() }}</p>
         }

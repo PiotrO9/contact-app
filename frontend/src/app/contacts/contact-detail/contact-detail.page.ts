@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { catchError, filter, finalize, of, switchMap } from 'rxjs';
+import { catchError, filter, finalize, of, switchMap, tap } from 'rxjs';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { Contact, ContactsApiService } from '../contacts-api.service';
 
@@ -47,6 +47,7 @@ export class ContactDetailPage implements OnInit {
     }),
     email: new FormControl('', { nonNullable: true, validators: [Validators.email] }),
     phone: new FormControl('', { nonNullable: true }),
+    note: new FormControl('', { nonNullable: true }),
   });
 
   ngOnInit(): void {
@@ -58,8 +59,7 @@ export class ContactDetailPage implements OnInit {
       return;
     }
 
-    this.contactsApi
-      .getContact(id)
+    this.loadContact(id)
       .pipe(
         catchError((error: unknown) => {
           if (error instanceof HttpErrorResponse && error.status === 404) {
@@ -70,13 +70,7 @@ export class ContactDetailPage implements OnInit {
         }),
         finalize(() => this.isLoading.set(false)),
       )
-      .subscribe((contact) => {
-        this.contact.set(contact);
-
-        if (contact) {
-          this.title.setTitle(`${contact.name} | Kontakty`);
-        }
-      });
+      .subscribe();
   }
 
   protected startEdit(contact: Contact): void {
@@ -85,6 +79,7 @@ export class ContactDetailPage implements OnInit {
       name: contact.name,
       email: contact.email ?? '',
       phone: contact.phone ?? '',
+      note: contact.note ?? '',
     });
     this.isEditing.set(true);
   }
@@ -103,20 +98,22 @@ export class ContactDetailPage implements OnInit {
     }
 
     this.isSubmitting = true;
-    const { name, email, phone } = this.form.getRawValue();
+    const { name, email, phone, note } = this.form.getRawValue();
 
     this.contactsApi
       .updateContact(contact.id, {
         name: name.trim(),
         email: this.emptyToNull(email),
         phone: this.emptyToNull(phone),
+        note: this.emptyToNull(note),
       })
-      .pipe(finalize(() => (this.isSubmitting = false)))
+      .pipe(
+        switchMap(() => this.loadContact(contact.id)),
+        finalize(() => (this.isSubmitting = false)),
+      )
       .subscribe({
-        next: (updatedContact) => {
-          this.contact.set(updatedContact);
+        next: () => {
           this.isEditing.set(false);
-          this.title.setTitle(`${updatedContact.name} | Kontakty`);
         },
         error: (error: unknown) => this.apiError.set(this.getErrorMessage(error)),
       });
@@ -173,6 +170,15 @@ export class ContactDetailPage implements OnInit {
     const trimmedValue = value.trim();
 
     return trimmedValue ? trimmedValue : null;
+  }
+
+  private loadContact(id: string) {
+    return this.contactsApi.getContact(id).pipe(
+      tap((contact) => {
+        this.contact.set(contact);
+        this.title.setTitle(`${contact.name} | Kontakty`);
+      }),
+    );
   }
 
   private getErrorMessage(error: unknown): string {

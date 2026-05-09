@@ -40,6 +40,7 @@ export class ContactsService {
         name: dto.name,
         email: dto.email || null,
         phone: dto.phone || null,
+        note: dto.note || null,
       },
     });
   }
@@ -53,6 +54,7 @@ export class ContactsService {
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.email !== undefined && { email: dto.email || null }),
         ...(dto.phone !== undefined && { phone: dto.phone || null }),
+        ...(dto.note !== undefined && { note: dto.note || null }),
         ...(dto.isFavorite !== undefined && { isFavorite: dto.isFavorite }),
       },
     });

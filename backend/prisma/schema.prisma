@@ -19,6 +19,7 @@ model Contact {
   name       String
   email      String?
   phone      String?
+  note       String?
   isFavorite Boolean  @default(false)
   deletedAt  DateTime?
   createdAt  DateTime @default(now())

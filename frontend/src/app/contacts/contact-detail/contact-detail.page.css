@@ -136,6 +136,10 @@ dd {
   font-size: 15px;
 }
 
+.note-value {
+  white-space: pre-wrap;
+}
+
 .edit-form {
   display: grid;
   gap: 14px;

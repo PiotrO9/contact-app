@@ -14,6 +14,10 @@ export class UpdateContactDto {
   phone?: string | null;
 
   @IsOptional()
+  @IsString()
+  note?: string | null;
+
+  @IsOptional()
   @IsBoolean()
   isFavorite?: boolean;
 }

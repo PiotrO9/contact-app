@@ -12,4 +12,8 @@ export class CreateContactDto {
   @IsOptional()
   @IsString()
   phone?: string | null;
+
+  @IsOptional()
+  @IsString()
+  note?: string | null;
 }

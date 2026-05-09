@@ -32,6 +32,7 @@ export class NewContactPage {
       validators: [Validators.required, Validators.email],
     }),
     phone: new FormControl('', { nonNullable: true }),
+    note: new FormControl('', { nonNullable: true }),
   });
   protected readonly apiError = signal('');
   protected isSubmitting = false;
@@ -54,13 +55,14 @@ export class NewContactPage {
     }
 
     this.isSubmitting = true;
-    const { firstName, lastName, email, phone } = this.form.getRawValue();
+    const { firstName, lastName, email, phone, note } = this.form.getRawValue();
 
     this.contactsApi
       .createContact({
         name: `${firstName.trim()} ${lastName.trim()}`.trim(),
         email,
         phone,
+        note,
       })
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
