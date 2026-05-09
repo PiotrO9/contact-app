@@ -18,6 +18,10 @@ export class UpdateContactDto {
   note?: string | null;
 
   @IsOptional()
+  @IsString()
+  relationship?: string | null;
+
+  @IsOptional()
   @IsBoolean()
   isFavorite?: boolean;
 }

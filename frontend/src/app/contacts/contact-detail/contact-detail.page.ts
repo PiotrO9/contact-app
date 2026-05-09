@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { catchError, filter, finalize, of, switchMap, tap } from 'rxjs';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { Contact, ContactsApiService } from '../contacts-api.service';
@@ -23,6 +24,7 @@ import { Contact, ContactsApiService } from '../contacts-api.service';
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
   ],
   templateUrl: './contact-detail.page.html',
   styleUrl: './contact-detail.page.css',
@@ -40,6 +42,26 @@ export class ContactDetailPage implements OnInit {
   protected readonly apiError = signal('');
   protected readonly notFound = signal(false);
   protected isSubmitting = false;
+  protected readonly relationshipOptions = [
+    'Mama',
+    'Tata',
+    'Rodzic',
+    'Corka',
+    'Syn',
+    'Dziecko',
+    'Siostra',
+    'Brat',
+    'Babcia',
+    'Dziadek',
+    'Ciocia',
+    'Wujek',
+    'Kuzyn',
+    'Kuzynka',
+    'Maz',
+    'Zona',
+    'Partner',
+    'Partnerka',
+  ];
   protected readonly form = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
@@ -48,6 +70,7 @@ export class ContactDetailPage implements OnInit {
     email: new FormControl('', { nonNullable: true, validators: [Validators.email] }),
     phone: new FormControl('', { nonNullable: true }),
     note: new FormControl('', { nonNullable: true }),
+    relationship: new FormControl('', { nonNullable: true }),
   });
 
   ngOnInit(): void {
@@ -80,6 +103,7 @@ export class ContactDetailPage implements OnInit {
       email: contact.email ?? '',
       phone: contact.phone ?? '',
       note: contact.note ?? '',
+      relationship: contact.relationship ?? '',
     });
     this.isEditing.set(true);
   }
@@ -98,7 +122,7 @@ export class ContactDetailPage implements OnInit {
     }
 
     this.isSubmitting = true;
-    const { name, email, phone, note } = this.form.getRawValue();
+    const { name, email, phone, note, relationship } = this.form.getRawValue();
 
     this.contactsApi
       .updateContact(contact.id, {
@@ -106,6 +130,7 @@ export class ContactDetailPage implements OnInit {
         email: this.emptyToNull(email),
         phone: this.emptyToNull(phone),
         note: this.emptyToNull(note),
+        relationship: this.emptyToNull(relationship),
       })
       .pipe(
         switchMap(() => this.loadContact(contact.id)),

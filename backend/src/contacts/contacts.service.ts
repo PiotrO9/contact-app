@@ -55,6 +55,9 @@ export class ContactsService {
         ...(dto.email !== undefined && { email: dto.email || null }),
         ...(dto.phone !== undefined && { phone: dto.phone || null }),
         ...(dto.note !== undefined && { note: dto.note || null }),
+        ...(dto.relationship !== undefined && {
+          relationship: dto.relationship || null,
+        }),
         ...(dto.isFavorite !== undefined && { isFavorite: dto.isFavorite }),
       },
     });

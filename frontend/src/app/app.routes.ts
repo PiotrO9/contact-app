@@ -36,6 +36,12 @@ export const routes: Routes = [
         title: 'Ulubione kontakty | Kontakty',
       },
       {
+        path: 'contacts/family',
+        component: ContactListComponent,
+        data: { familyOnly: true },
+        title: 'Rodzina | Kontakty',
+      },
+      {
         path: 'contacts/trash',
         component: ContactListComponent,
         data: { trashOnly: true },

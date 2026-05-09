@@ -9,6 +9,7 @@ export type Contact = {
   email: string | null;
   phone: string | null;
   note: string | null;
+  relationship: string | null;
   avatarUrl?: string | null;
   isFavorite: boolean;
   deletedAt?: string | null;
@@ -26,6 +27,7 @@ export type UpdateContactDto = Partial<{
   email: string | null;
   phone: string | null;
   note: string | null;
+  relationship: string | null;
   isFavorite: boolean;
 }>;
 

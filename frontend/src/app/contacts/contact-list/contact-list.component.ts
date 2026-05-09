@@ -35,6 +35,7 @@ export class ContactListComponent implements OnInit {
     'name',
     'email',
     'phone',
+    'relationship',
     'actions',
   ];
   protected readonly contacts = signal<Contact[]>([]);
@@ -42,12 +43,17 @@ export class ContactListComponent implements OnInit {
   protected readonly favoritesOnly = computed(
     () => this.route.snapshot.data['favoritesOnly'] === true,
   );
+  protected readonly familyOnly = computed(
+    () => this.route.snapshot.data['familyOnly'] === true,
+  );
   protected readonly trashOnly = computed(
     () => this.route.snapshot.data['trashOnly'] === true,
   );
   protected readonly visibleContacts = computed(() => {
     const query = this.normalizeSearchText(this.searchService.query());
-    const contacts = this.favoritesOnly()
+    const contacts = this.familyOnly()
+      ? this.contacts().filter((contact) => Boolean(contact.relationship))
+      : this.favoritesOnly()
       ? this.contacts().filter((contact) => contact.isFavorite)
       : this.contacts();
 
@@ -57,7 +63,9 @@ export class ContactListComponent implements OnInit {
 
     return contacts.filter((contact) =>
       this.normalizeSearchText(
-        [contact.name, contact.email, contact.phone].filter(Boolean).join(' '),
+        [contact.name, contact.email, contact.phone, contact.relationship]
+          .filter(Boolean)
+          .join(' '),
       ).includes(query),
     );
   });
@@ -65,7 +73,13 @@ export class ContactListComponent implements OnInit {
     () => this.searchService.query().trim().length > 0,
   );
   protected readonly pageTitle = computed(() =>
-    this.trashOnly() ? 'Kosz' : this.favoritesOnly() ? 'Ulubione' : 'Kontakty',
+    this.trashOnly()
+      ? 'Kosz'
+      : this.familyOnly()
+        ? 'Rodzina'
+        : this.favoritesOnly()
+          ? 'Ulubione'
+          : 'Kontakty',
   );
   protected readonly emptyTitle = computed(() => {
     if (this.hasSearchQuery()) {
@@ -74,6 +88,10 @@ export class ContactListComponent implements OnInit {
 
     if (this.trashOnly()) {
       return 'Kosz jest pusty';
+    }
+
+    if (this.familyOnly()) {
+      return 'Brak kontaktow rodzinnych';
     }
 
     return this.favoritesOnly() ? 'Brak ulubionych kontaktow' : 'Brak kontaktow';
@@ -85,6 +103,10 @@ export class ContactListComponent implements OnInit {
 
     if (this.trashOnly()) {
       return 'Usuniete kontakty pojawia sie tutaj z opcja przywrocenia.';
+    }
+
+    if (this.familyOnly()) {
+      return 'Ustaw pokrewienstwo w edycji kontaktu, aby pojawil sie tutaj.';
     }
 
     return this.favoritesOnly()

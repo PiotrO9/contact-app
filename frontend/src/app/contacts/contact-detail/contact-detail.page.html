@@ -80,6 +80,10 @@
           <dt>Notatka</dt>
           <dd class="note-value">{{ contact.note || '-' }}</dd>
         </div>
+        <div>
+          <dt>Pokrewienstwo</dt>
+          <dd>{{ contact.relationship || '-' }}</dd>
+        </div>
       </dl>
 
       @if (isEditing()) {
@@ -106,6 +110,16 @@
           <mat-form-field appearance="outline">
             <mat-label>Notatka</mat-label>
             <textarea matInput formControlName="note" rows="4"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Pokrewienstwo</mat-label>
+            <mat-select formControlName="relationship">
+              <mat-option value="">Brak</mat-option>
+              @for (relationship of relationshipOptions; track relationship) {
+                <mat-option [value]="relationship">{{ relationship }}</mat-option>
+              }
+            </mat-select>
           </mat-form-field>
 
           @if (apiError()) {
