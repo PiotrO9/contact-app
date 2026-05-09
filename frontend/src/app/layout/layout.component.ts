@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -19,7 +19,8 @@ export class LayoutComponent {
 
   protected readonly user = this.authService.user;
   protected readonly searchQuery = this.searchService.query;
-  protected readonly sidebarOpen = signal(true);
+  protected readonly isMobile = signal(this.matchesMobileViewport());
+  protected readonly sidebarOpen = signal(!this.isMobile());
 
   protected readonly displayName = computed(() => {
     const user = this.user();
@@ -29,6 +30,20 @@ export class LayoutComponent {
 
   protected toggleSidebar(): void {
     this.sidebarOpen.update((isOpen) => !isOpen);
+  }
+
+  protected closeSidebar(): void {
+    if (this.isMobile()) {
+      this.sidebarOpen.set(false);
+    }
+  }
+
+  @HostListener('window:resize')
+  protected onWindowResize(): void {
+    const isMobile = this.matchesMobileViewport();
+
+    this.isMobile.set(isMobile);
+    this.sidebarOpen.set(!isMobile);
   }
 
   protected updateSearch(event: Event): void {
@@ -42,5 +57,9 @@ export class LayoutComponent {
 
     image.classList.add('is-hidden');
     image.setAttribute('aria-hidden', 'true');
+  }
+
+  private matchesMobileViewport(): boolean {
+    return typeof window !== 'undefined' && window.matchMedia('(max-width: 800px)').matches;
   }
 }

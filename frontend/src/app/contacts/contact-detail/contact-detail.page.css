@@ -27,6 +27,10 @@
   color: #c5221f;
 }
 
+.favorite-button .is-favorite {
+  color: #f4b400;
+}
+
 .state {
   min-height: 320px;
   display: grid;

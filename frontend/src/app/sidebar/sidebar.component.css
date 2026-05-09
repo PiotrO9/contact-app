@@ -111,35 +111,37 @@
 
 @media (max-width: 800px) {
   .sidebar {
-    align-items: center;
-    padding: 10px 8px;
+    align-items: stretch;
+    padding: 12px 22px 18px 4px;
+    background: #f7f9fc;
   }
 
   .nav-item span {
-    display: none;
+    display: inline;
   }
 
   .label-section {
-    margin-top: 12px;
+    margin-top: 18px;
   }
 
   .section-heading {
-    justify-content: center;
-    padding: 0;
+    justify-content: space-between;
+    padding: 0 10px 0 22px;
   }
 
   .section-heading h2 {
-    display: none;
+    display: block;
   }
 
   .nav-item {
-    width: 52px;
-    grid-template-columns: 1fr;
-    place-items: center;
-    padding: 0;
+    width: 100%;
+    min-height: 44px;
+    grid-template-columns: 40px minmax(0, 1fr);
+    padding: 0 18px 0 22px;
   }
 
   .nav-item.primary-action {
     margin-bottom: 8px;
   }
+
 }

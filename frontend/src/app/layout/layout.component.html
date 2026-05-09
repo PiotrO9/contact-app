@@ -42,7 +42,12 @@
     </mat-toolbar>
 
     <mat-sidenav-container class="content-shell">
-      <mat-sidenav class="layout-sidebar" mode="side" [opened]="sidebarOpen()">
+      <mat-sidenav
+        class="layout-sidebar"
+        [mode]="isMobile() ? 'over' : 'side'"
+        [opened]="sidebarOpen()"
+        (closedStart)="closeSidebar()"
+      >
         <app-sidebar />
       </mat-sidenav>
 

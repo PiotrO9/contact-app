@@ -9,6 +9,20 @@
       @if (contact(); as contact) {
         <div class="contact-actions">
           @if (!isEditing()) {
+            <button
+              matIconButton
+              type="button"
+              class="favorite-button"
+              [attr.aria-label]="
+                contact.isFavorite ? 'Usun z ulubionych' : 'Dodaj do ulubionych'
+              "
+              (click)="toggleFavorite(contact)"
+            >
+              <mat-icon [class.is-favorite]="contact.isFavorite" aria-hidden="true">
+                {{ contact.isFavorite ? 'star' : 'star_border' }}
+              </mat-icon>
+            </button>
+
             <button matButton type="button" (click)="startEdit(contact)">
               <mat-icon>edit</mat-icon>
               Edytuj

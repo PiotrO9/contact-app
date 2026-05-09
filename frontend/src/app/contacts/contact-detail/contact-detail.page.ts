@@ -139,6 +139,18 @@ export class ContactDetailPage implements OnInit {
       .subscribe(() => void this.router.navigate(['/contacts']));
   }
 
+  protected toggleFavorite(contact: Contact): void {
+    const previousContact = contact;
+    const nextIsFavorite = !contact.isFavorite;
+
+    this.contact.set({ ...contact, isFavorite: nextIsFavorite });
+
+    this.contactsApi.updateContact(contact.id, { isFavorite: nextIsFavorite }).subscribe({
+      next: (updatedContact) => this.contact.set(updatedContact),
+      error: () => this.contact.set(previousContact),
+    });
+  }
+
   protected getInitials(contact: Contact): string {
     const initials = contact.name
       .split(' ')

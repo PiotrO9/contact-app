@@ -4,6 +4,11 @@
 }
 
 .layout-shell {
+  --layout-sidebar-width: 286px;
+  --layout-toolbar-gap: 20px;
+  --layout-toolbar-left-padding: 12px;
+  --page-content-left-padding: 24px;
+
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -19,7 +24,7 @@
 }
 
 .layout-sidebar {
-  width: 286px;
+  width: var(--layout-sidebar-width);
   border-right: 0;
   overflow: hidden;
   background: #f7f9fc;
@@ -47,8 +52,8 @@
   z-index: 2;
   flex: 0 0 64px;
   height: 64px;
-  gap: 20px;
-  padding: 0 20px 0 12px;
+  gap: var(--layout-toolbar-gap);
+  padding: 0 20px 0 var(--layout-toolbar-left-padding);
   background: #ffffff;
   color: #202124;
 }
@@ -57,7 +62,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 220px;
+  min-width: calc(
+    var(--layout-sidebar-width) + var(--page-content-left-padding) -
+      var(--layout-toolbar-left-padding) - var(--layout-toolbar-gap)
+  );
 }
 
 .icon-button {
@@ -151,29 +159,62 @@
 }
 
 @media (max-width: 800px) {
+  .layout-shell {
+    --layout-sidebar-width: 282px;
+  }
+
   .layout-sidebar {
-    width: 88px;
+    width: var(--layout-sidebar-width);
+    position: fixed;
+    inset: 0 auto 0 0;
+  }
+
+  :host ::ng-deep .content-shell .mat-drawer-backdrop {
+    position: fixed;
+    inset: 0;
   }
 
   .layout-toolbar {
     height: 60px;
-    gap: 10px;
-    padding: 0 12px;
+    flex-basis: 60px;
+    gap: 8px;
+    padding: 0 12px 0 8px;
   }
 
   .brand {
     min-width: 0;
+    gap: 6px;
   }
 
+  .brand-mark,
   .brand-title {
     display: none;
   }
 
   .search-box {
-    max-width: none;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    margin-left: auto;
+    padding: 0;
+    background: transparent;
+  }
+
+  .search-box:hover {
+    background: #f1f3f4;
+  }
+
+  .search-box input {
+    display: none;
+  }
+
+  .user-chip {
+    flex: 0 0 36px;
+    margin-left: 0;
   }
 
   .page-content {
-    padding: 10px;
+    padding: 0 12px 16px;
   }
 }

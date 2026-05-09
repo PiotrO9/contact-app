@@ -126,6 +126,32 @@
           ></tr>
         </table>
       </div>
+
+      <div class="mobile-contact-list" aria-label="Kontakty">
+        <div class="mobile-list-heading">Imie i nazwisko</div>
+
+        @for (contact of visibleContacts(); track contact.id) {
+          <button
+            class="mobile-contact-row"
+            type="button"
+            [disabled]="trashOnly()"
+            (click)="openContact(contact)"
+          >
+            <span class="avatar" aria-hidden="true">
+              {{ getInitials(contact) }}
+              @if (contact.avatarUrl) {
+                <img
+                  [src]="contact.avatarUrl"
+                  [alt]="contact.name"
+                  referrerpolicy="no-referrer"
+                  (error)="hideBrokenAvatar($event)"
+                />
+              }
+            </span>
+            <span>{{ contact.name }}</span>
+          </button>
+        }
+      </div>
     }
   </div>
 </section>
