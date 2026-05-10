@@ -1,180 +1,80 @@
 # Contact App
 
-Aplikacja do zarzadzania kontaktami z logowaniem przez Supabase Auth. Projekt sklada sie z backendu NestJS, frontendu Angular oraz bazy PostgreSQL obslugiwanej przez Prisma.
+Contact App is a web application for managing a private contact book. The project combines an Angular frontend, a NestJS backend, and a PostgreSQL database accessed through Prisma. Authentication is handled with Supabase Auth and Google OAuth, so contacts are assigned to individual users.
 
-## Funkcje
+## Project Purpose
 
-- logowanie przez Google OAuth z wykorzystaniem Supabase,
-- lista kontaktow przypisana do zalogowanego uzytkownika,
-- dodawanie, edycja i usuwanie kontaktow,
-- kosz z mozliwoscia przywracania usunietych kontaktow,
-- oznaczanie kontaktow jako ulubione,
-- notatki, relacja, telefon i e-mail przy kontakcie,
-- etykiety kontaktow,
-- import i eksport kontaktow w formacie CSV.
+The application keeps contact data organized in one place and makes important people easy to find. It supports common contact management workflows, label-based organization, favorites, and a trash view for safely restoring removed entries.
 
-## Stack technologiczny
+## Key Features
 
-- **Frontend:** Angular 21, Angular Material, RxJS
-- **Backend:** NestJS 11, TypeScript
-- **Baza danych:** PostgreSQL
-- **ORM:** Prisma
-- **Auth:** Supabase Auth
-- **Testy:** Jest po stronie backendu, Angular test runner po stronie frontendu
+- Google OAuth sign-in,
+- separate contact lists for each authenticated user,
+- creating, editing, and deleting contacts,
+- contact detail view,
+- marking contacts as favorites,
+- family contacts view,
+- trash view with contact restore support,
+- labels assigned to contacts,
+- fields for email, phone number, notes, and relationship type,
+- contact import and export in CSV format.
 
-## Struktura projektu
+## Architecture
+
+The project is split into three main parts:
 
 ```text
 contact-app/
-+-- backend/   # API NestJS, Prisma, autoryzacja i logika kontaktow
-+-- frontend/  # Aplikacja Angular
-+-- shared/    # Miejsce na wspoldzielone elementy projektu
++-- backend/   # NestJS API, authentication, Prisma, and contact logic
++-- frontend/  # Angular application with user-facing views
++-- shared/    # place for shared project elements
 ```
 
-## Wymagania
+The frontend is responsible for the user interface, navigation, and API communication. The backend exposes endpoints for authentication, contacts, labels, and CSV import/export. The data layer is based on PostgreSQL, with database access handled by Prisma.
 
-- Node.js zgodny z uzywanymi wersjami Angular/Nest,
-- npm,
-- projekt Supabase z wlaczonym Google OAuth,
-- baza PostgreSQL, np. Supabase Postgres.
+## Technology Stack
 
-## Konfiguracja
+- **Frontend:** Angular 21, Angular Material, RxJS
+- **Backend:** NestJS 11, TypeScript
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Authentication:** Supabase Auth
+- **Tests:** Jest on the backend, Angular test runner on the frontend
 
-### Backend
+## Frontend
 
-Skopiuj przykladowa konfiguracje i uzupelnij dane Supabase oraz Postgresa:
+The frontend application includes views for sign-in, contact lists, favorites, family contacts, trash, creating a new contact, contact details, and label management. Access to the main views is protected by an authentication guard, while unauthenticated users are redirected to the sign-in screen.
 
-```bash
-cd backend
-cp .env.example .env
-```
+## Backend
 
-Najwazniejsze zmienne:
+The backend is a NestJS application with modules responsible for authentication, contacts, and database access. The API uses the Supabase session stored in cookies and also supports Bearer tokens in the `Authorization` header.
 
-- `DATABASE_URL` - polaczenie uzywane przez aplikacje NestJS,
-- `DIRECT_URL` - bezposrednie polaczenie dla migracji Prisma,
-- `SUPABASE_URL` - adres projektu Supabase,
-- `SUPABASE_PUBLISHABLE_KEY` albo `SUPABASE_ANON_KEY` - publiczny klucz Supabase,
-- `BACKEND_URL` - lokalny lub produkcyjny adres API,
-- `FRONTEND_URL` - adres aplikacji webowej,
-- `FRONTEND_ORIGINS` - dozwolone originy CORS oddzielone przecinkami.
+Main API areas:
 
-W Supabase dodaj redirect URL:
+- Google OAuth authentication,
+- reading the currently authenticated user,
+- signing out,
+- listing a user's contacts,
+- creating and updating contacts,
+- moving contacts to trash,
+- restoring contacts from trash,
+- listing and creating labels,
+- importing and exporting CSV files.
 
-```text
-http://localhost:3000/auth/callback
-```
+## Data Model
 
-### Frontend
+The data model contains three main entities:
 
-Skopiuj konfiguracje frontendu:
+- `Contact` - a user-owned contact with personal details, favorite status, and trash state,
+- `Label` - a user-created label,
+- `ContactLabel` - a many-to-many relationship between contacts and labels.
 
-```bash
-cd frontend
-cp .env.example .env
-```
+The database schema is defined in `backend/prisma/schema.prisma`, and schema history is stored in Prisma migrations.
 
-Zmienna `API_URL` powinna wskazywac na backend, domyslnie:
+## Security and Data Separation
 
-```text
-API_URL="http://localhost:3000"
-```
+Contacts and labels are assigned to a user identifier. Data operations require an authenticated user, and the backend reads the owner's identifier from the authentication context. This keeps each user working only with their own contacts.
 
-Plik `src/environments/environment.generated.ts` jest generowany automatycznie przed startem i buildem frontendu.
+## CSV Import and Export
 
-## Uruchomienie lokalne
-
-Zainstaluj zaleznosci w obu czesciach projektu:
-
-```bash
-cd backend
-npm install
-
-cd ../frontend
-npm install
-```
-
-Uruchom migracje bazy danych:
-
-```bash
-cd backend
-npm run prisma:migrate
-```
-
-Uruchom backend:
-
-```bash
-cd backend
-npm run start:dev
-```
-
-Uruchom frontend w drugim terminalu:
-
-```bash
-cd frontend
-npm start
-```
-
-Domyslne adresy:
-
-- frontend: `http://localhost:4200`
-- backend: `http://localhost:3000`
-
-## Przydatne komendy
-
-Backend:
-
-```bash
-npm run start:dev       # tryb developerski z watch mode
-npm run build           # build produkcyjny
-npm run test            # testy jednostkowe
-npm run test:e2e        # testy e2e
-npm run prisma:migrate  # migracje Prisma
-npm run prisma:studio   # Prisma Studio
-```
-
-Frontend:
-
-```bash
-npm start       # lokalny dev server
-npm run build   # build aplikacji
-npm run test    # testy frontendu
-```
-
-## API
-
-Najwazniejsze endpointy backendu:
-
-- `GET /auth/google` - start logowania Google,
-- `GET /auth/callback` - callback OAuth,
-- `GET /auth/me` - aktualnie zalogowany uzytkownik,
-- `POST /auth/logout` - wylogowanie,
-- `GET /contacts` - lista kontaktow,
-- `POST /contacts` - utworzenie kontaktu,
-- `GET /contacts/:id` - szczegoly kontaktu,
-- `PATCH /contacts/:id` - aktualizacja kontaktu,
-- `DELETE /contacts/:id` - przeniesienie kontaktu do kosza,
-- `GET /contacts/trash/items` - usuniete kontakty,
-- `PATCH /contacts/:id/restore` - przywrocenie kontaktu,
-- `GET /contacts/labels` - lista etykiet,
-- `POST /contacts/labels` - utworzenie etykiety,
-- `GET /contacts/export.csv` - eksport CSV,
-- `POST /contacts/import.csv` - import CSV.
-
-Endpointy kontaktow wymagaja zalogowanego uzytkownika. Backend obsluguje sesje Supabase z ciasteczek oraz token Bearer w naglowku `Authorization`.
-
-## Baza danych
-
-Model danych obejmuje:
-
-- `Contact` - dane kontaktu, wlasciciel, status ulubionego i kosz,
-- `Label` - etykiety uzytkownika,
-- `ContactLabel` - relacja wiele-do-wielu miedzy kontaktami i etykietami.
-
-Schemat znajduje sie w `backend/prisma/schema.prisma`, a migracje w `backend/prisma/migrations`.
-
-## Uwagi developerskie
-
-- Backend waliduje DTO globalnym `ValidationPipe` z wlaczona opcja `whitelist`.
-- CORS dopuszcza lokalny frontend oraz originy z konfiguracji.
-- Frontend korzysta z `withCredentials`, dlatego konfiguracja URL-i i originow musi byc spojna po obu stronach.
+The application supports exporting contacts to a CSV file and importing contact data from CSV. This makes it easier to move data between applications, create contact backups, and add multiple entries at once.
