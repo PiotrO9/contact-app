@@ -21,6 +21,15 @@ export type ContactLabel = {
   name: string;
 };
 
+export type ContactImportSummary = {
+  imported: number;
+  skipped: number;
+  failed: Array<{
+    row: number;
+    reason: string;
+  }>;
+};
+
 export type CreateContactDto = {
   name: string;
   email: string;
@@ -81,6 +90,24 @@ export class ContactsApiService {
     return this.http.post<Contact>(`${this.apiUrl}/contacts`, contact, {
       withCredentials: true,
     });
+  }
+
+  exportContacts(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/contacts/export.csv`, {
+      responseType: 'blob',
+      withCredentials: true,
+    });
+  }
+
+  importContacts(file: File): Observable<ContactImportSummary> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<ContactImportSummary>(
+      `${this.apiUrl}/contacts/import.csv`,
+      formData,
+      { withCredentials: true },
+    );
   }
 
   updateContact(id: string, contact: UpdateContactDto): Observable<Contact> {

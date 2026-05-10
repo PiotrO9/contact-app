@@ -4,6 +4,16 @@ import { CreateLabelDto } from './dto/create-label.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 
+type ImportedContactDto = {
+  name: string;
+  email: string;
+  phone: string | null;
+  note: string | null;
+  relationship: string | null;
+  isFavorite: boolean;
+  labels: string[];
+};
+
 @Injectable()
 export class ContactsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -167,6 +177,49 @@ export class ContactsService {
         include: this.contactLabelsInclude,
       })
       .then((contact) => this.toContactResponse(contact));
+  }
+
+  async upsertImportedContactForUser(userId: string, dto: ImportedContactDto) {
+    const existingContact = await this.prisma.contact.findFirst({
+      where: {
+        userId,
+        email: {
+          equals: dto.email,
+          mode: 'insensitive',
+        },
+        deletedAt: null,
+      },
+    });
+
+    const contact = existingContact
+      ? await this.prisma.contact.update({
+          where: { id: existingContact.id },
+          data: {
+            name: dto.name,
+            email: dto.email,
+            phone: dto.phone,
+            note: dto.note,
+            relationship: dto.relationship,
+            isFavorite: dto.isFavorite,
+          },
+          include: this.contactLabelsInclude,
+        })
+      : await this.prisma.contact.create({
+          data: {
+            userId,
+            name: dto.name,
+            email: dto.email,
+            phone: dto.phone,
+            note: dto.note,
+            relationship: dto.relationship,
+            isFavorite: dto.isFavorite,
+          },
+          include: this.contactLabelsInclude,
+        });
+
+    await this.syncLabelsForContact(userId, contact.id, dto.labels);
+
+    return this.findOneForUser(userId, contact.id);
   }
 
   async updateForUser(userId: string, id: string, dto: UpdateContactDto) {

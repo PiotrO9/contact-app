@@ -8,9 +8,13 @@ import {
   Post,
   Req,
   Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request, Response } from 'express';
 import { AuthService } from '../auth/auth.service';
+import { ContactsCsvService } from './contacts-csv.service';
 import { ContactsService } from './contacts.service';
 import { CreateLabelDto } from './dto/create-label.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -20,6 +24,7 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 export class ContactsController {
   constructor(
     private readonly authService: AuthService,
+    private readonly contactsCsvService: ContactsCsvService,
     private readonly contactsService: ContactsService,
   ) {}
 
@@ -60,6 +65,36 @@ export class ContactsController {
     );
 
     return this.contactsService.findLabelsForUser(userId);
+  }
+
+  @Get('export.csv')
+  async exportCsv(@Req() request: Request, @Res() response: Response) {
+    const userId = await this.authService.getAuthenticatedUserId(
+      request,
+      response,
+    );
+    const contacts = await this.contactsService.findAllForUser(userId);
+    const csv = this.contactsCsvService.exportContacts(contacts);
+
+    response
+      .attachment('contacts.csv')
+      .type('text/csv; charset=utf-8')
+      .send(csv);
+  }
+
+  @Post('import.csv')
+  @UseInterceptors(FileInterceptor('file'))
+  async importCsv(
+    @UploadedFile() file: { buffer: Buffer },
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const userId = await this.authService.getAuthenticatedUserId(
+      request,
+      response,
+    );
+
+    return this.contactsCsvService.importContacts(userId, file);
   }
 
   @Post('labels')

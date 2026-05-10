@@ -10,7 +10,22 @@
 
       @if (!trashOnly()) {
         <div class="table-actions" aria-label="Akcje listy">
-          <button type="button" aria-label="Importuj">
+          <input
+            #csvInput
+            type="file"
+            accept=".csv,text/csv"
+            class="csv-input"
+            (change)="importContacts($event)"
+          />
+          <button type="button" aria-label="Eksportuj CSV" (click)="exportContacts()">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button
+            type="button"
+            aria-label="Importuj CSV"
+            [disabled]="isImporting()"
+            (click)="openImportPicker()"
+          >
             <mat-icon>upload</mat-icon>
           </button>
         </div>

@@ -1,9 +1,18 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { filter, finalize, switchMap } from 'rxjs';
 import { SearchService } from '../../search.service';
@@ -18,6 +27,7 @@ import { Contact, ContactsApiService } from '../contacts-api.service';
     MatDialogModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
     MatTableModule,
   ],
   templateUrl: './contact-list.component.html',
@@ -29,6 +39,10 @@ export class ContactListComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly searchService = inject(SearchService);
+  private readonly snackBar = inject(MatSnackBar);
+
+  @ViewChild('csvInput')
+  private readonly csvInput?: ElementRef<HTMLInputElement>;
 
   protected readonly displayedColumns = [
     'avatar',
@@ -39,6 +53,7 @@ export class ContactListComponent implements OnInit {
     'actions',
   ];
   protected readonly contacts = signal<Contact[]>([]);
+  protected readonly isImporting = signal(false);
   protected readonly isLoading = signal(true);
   protected readonly selectedLabel = signal('');
   protected readonly favoritesOnly = computed(
@@ -163,6 +178,60 @@ export class ContactListComponent implements OnInit {
         switchMap(() => this.contactsApi.restoreContact(contact.id)),
       )
       .subscribe(() => this.loadContacts());
+  }
+
+  protected exportContacts(): void {
+    this.contactsApi.exportContacts().subscribe({
+      next: (csv) => {
+        const url = URL.createObjectURL(csv);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.download = 'contacts.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.snackBar.open('Nie udalo sie wyeksportowac kontaktow.', 'OK', {
+          duration: 5000,
+        });
+      },
+    });
+  }
+
+  protected openImportPicker(): void {
+    this.csvInput?.nativeElement.click();
+  }
+
+  protected importContacts(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.isImporting.set(true);
+    this.contactsApi
+      .importContacts(file)
+      .pipe(finalize(() => this.isImporting.set(false)))
+      .subscribe({
+        next: (summary) => {
+          input.value = '';
+          this.loadContacts();
+          this.snackBar.open(
+            `Zaimportowano: ${summary.imported}, pominieto: ${summary.skipped}, bledy: ${summary.failed.length}.`,
+            'OK',
+            { duration: 7000 },
+          );
+        },
+        error: () => {
+          input.value = '';
+          this.snackBar.open('Nie udalo sie zaimportowac pliku CSV.', 'OK', {
+            duration: 5000,
+          });
+        },
+      });
   }
 
   private loadContacts(): void {
