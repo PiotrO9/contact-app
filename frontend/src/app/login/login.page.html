@@ -1,12 +1,5 @@
 <main class="login-shell">
   <section class="login-panel" aria-labelledby="login-title">
-    <div class="brand-lockup" aria-hidden="true">
-      <span class="brand-mark">
-        <span></span>
-      </span>
-      <span class="brand-name">Contact App</span>
-    </div>
-
     <mat-card class="login-card" appearance="outlined">
       <mat-card-header>
         <mat-card-title id="login-title">Logowanie</mat-card-title>
@@ -42,7 +35,7 @@
               />
             </svg>
           </span>
-          <span>{{ isLoading() ? 'Przekierowanie...' : 'Kontynuuj z Google' }}</span>
+          <span>{{ isLoading() ? 'Przekierowanie...' : 'Zaloguj' }}</span>
         </button>
 
         @if (errorMessage()) {
