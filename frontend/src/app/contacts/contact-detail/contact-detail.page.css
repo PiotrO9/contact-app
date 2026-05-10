@@ -140,6 +140,50 @@ dd {
   white-space: pre-wrap;
 }
 
+.label-list,
+.label-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.label-chip,
+.label-toggle {
+  min-height: 30px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #dadce0;
+  border-radius: 16px;
+  padding: 4px 12px;
+  background: #ffffff;
+  color: #3c4043;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.label-chip {
+  background: #e8f0fe;
+  border-color: #d2e3fc;
+  color: #174ea6;
+}
+
+.label-toggle {
+  cursor: pointer;
+}
+
+.label-toggle:hover,
+.label-toggle:focus-visible {
+  background: #f1f3f4;
+  outline: none;
+}
+
+.label-toggle.is-selected {
+  border-color: #1a73e8;
+  background: #e8f0fe;
+  color: #174ea6;
+}
+
 .edit-form {
   display: grid;
   gap: 14px;
@@ -154,6 +198,31 @@ dd {
   color: #202124;
   font-size: 20px;
   font-weight: 400;
+}
+
+.labels-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.labels-editor-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.labels-editor h3 {
+  margin: 0;
+  color: #202124;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.empty-labels {
+  margin: 0;
+  color: #5f6368;
+  font-size: 14px;
 }
 
 .api-error {
@@ -189,6 +258,7 @@ dd {
 
   .detail-actions,
   .contact-actions,
+  .labels-editor-heading,
   .form-actions {
     flex-wrap: wrap;
   }

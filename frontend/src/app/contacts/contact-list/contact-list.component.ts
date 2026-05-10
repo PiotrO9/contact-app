@@ -40,22 +40,27 @@ export class ContactListComponent implements OnInit {
   ];
   protected readonly contacts = signal<Contact[]>([]);
   protected readonly isLoading = signal(true);
+  protected readonly selectedLabel = signal('');
   protected readonly favoritesOnly = computed(
     () => this.route.snapshot.data['favoritesOnly'] === true,
   );
-  protected readonly familyOnly = computed(
-    () => this.route.snapshot.data['familyOnly'] === true,
-  );
-  protected readonly trashOnly = computed(
-    () => this.route.snapshot.data['trashOnly'] === true,
-  );
+  protected readonly familyOnly = computed(() => this.route.snapshot.data['familyOnly'] === true);
+  protected readonly trashOnly = computed(() => this.route.snapshot.data['trashOnly'] === true);
   protected readonly visibleContacts = computed(() => {
     const query = this.normalizeSearchText(this.searchService.query());
-    const contacts = this.familyOnly()
+    const label = this.normalizeSearchText(this.selectedLabel());
+    const routeContacts = this.familyOnly()
       ? this.contacts().filter((contact) => Boolean(contact.relationship))
       : this.favoritesOnly()
-      ? this.contacts().filter((contact) => contact.isFavorite)
-      : this.contacts();
+        ? this.contacts().filter((contact) => contact.isFavorite)
+        : this.contacts();
+    const contacts = label
+      ? routeContacts.filter((contact) =>
+          (contact.labels ?? []).some(
+            (contactLabel) => this.normalizeSearchText(contactLabel) === label,
+          ),
+        )
+      : routeContacts;
 
     if (!query) {
       return contacts;
@@ -64,14 +69,13 @@ export class ContactListComponent implements OnInit {
     return contacts.filter((contact) =>
       this.normalizeSearchText(
         [contact.name, contact.email, contact.phone, contact.relationship]
+          .concat(contact.labels ?? [])
           .filter(Boolean)
           .join(' '),
       ).includes(query),
     );
   });
-  protected readonly hasSearchQuery = computed(
-    () => this.searchService.query().trim().length > 0,
-  );
+  protected readonly hasSearchQuery = computed(() => this.searchService.query().trim().length > 0);
   protected readonly pageTitle = computed(() =>
     this.trashOnly()
       ? 'Kosz'
@@ -79,7 +83,9 @@ export class ContactListComponent implements OnInit {
         ? 'Rodzina'
         : this.favoritesOnly()
           ? 'Ulubione'
-          : 'Kontakty',
+          : this.selectedLabel()
+            ? this.selectedLabel()
+            : 'Kontakty',
   );
   protected readonly emptyTitle = computed(() => {
     if (this.hasSearchQuery()) {
@@ -92,6 +98,10 @@ export class ContactListComponent implements OnInit {
 
     if (this.familyOnly()) {
       return 'Brak kontaktow rodzinnych';
+    }
+
+    if (this.selectedLabel()) {
+      return 'Brak kontaktow z ta etykieta';
     }
 
     return this.favoritesOnly() ? 'Brak ulubionych kontaktow' : 'Brak kontaktow';
@@ -109,12 +119,19 @@ export class ContactListComponent implements OnInit {
       return 'Ustaw pokrewienstwo w edycji kontaktu, aby pojawil sie tutaj.';
     }
 
+    if (this.selectedLabel()) {
+      return 'Przypisz te etykiete w edycji kontaktu, aby pojawil sie w tym widoku.';
+    }
+
     return this.favoritesOnly()
       ? 'Oznacz kontakt gwiazdka, aby pojawil sie w tym widoku.'
       : 'Dodaj pierwszy kontakt, aby pojawil sie na tej liscie.';
   });
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((queryParams) => {
+      this.selectedLabel.set(queryParams.get('label') ?? '');
+    });
     this.loadContacts();
   }
 
@@ -184,20 +201,16 @@ export class ContactListComponent implements OnInit {
       ),
     );
 
-    this.contactsApi
-      .updateContact(contact.id, { isFavorite: nextIsFavorite })
-      .subscribe({
-        next: (updatedContact) => {
-          this.contacts.update((contacts) =>
-            contacts.map((item) =>
-              item.id === updatedContact.id ? updatedContact : item,
-            ),
-          );
-        },
-        error: () => {
-          this.contacts.set(previousContacts);
-        },
-      });
+    this.contactsApi.updateContact(contact.id, { isFavorite: nextIsFavorite }).subscribe({
+      next: (updatedContact) => {
+        this.contacts.update((contacts) =>
+          contacts.map((item) => (item.id === updatedContact.id ? updatedContact : item)),
+        );
+      },
+      error: () => {
+        this.contacts.set(previousContacts);
+      },
+    });
   }
 
   protected getInitials(contact: Contact): string {

@@ -13,9 +13,7 @@
               matIconButton
               type="button"
               class="favorite-button"
-              [attr.aria-label]="
-                contact.isFavorite ? 'Usun z ulubionych' : 'Dodaj do ulubionych'
-              "
+              [attr.aria-label]="contact.isFavorite ? 'Usun z ulubionych' : 'Dodaj do ulubionych'"
               (click)="toggleFavorite(contact)"
             >
               <mat-icon [class.is-favorite]="contact.isFavorite" aria-hidden="true">
@@ -84,6 +82,20 @@
           <dt>Pokrewienstwo</dt>
           <dd>{{ contact.relationship || '-' }}</dd>
         </div>
+        <div>
+          <dt>Etykiety</dt>
+          <dd>
+            @if (contact.labels.length > 0) {
+              <span class="label-list">
+                @for (label of contact.labels; track label) {
+                  <span class="label-chip">{{ label }}</span>
+                }
+              </span>
+            } @else {
+              -
+            }
+          </dd>
+        </div>
       </dl>
 
       @if (isEditing()) {
@@ -121,6 +133,34 @@
               }
             </mat-select>
           </mat-form-field>
+
+          <section class="labels-editor" aria-label="Etykiety kontaktu">
+            <div class="labels-editor-heading">
+              <h3>Etykiety</h3>
+              <a matButton routerLink="/labels">
+                <mat-icon>add</mat-icon>
+                Utworz etykiete
+              </a>
+            </div>
+
+            @if (availableLabels().length > 0) {
+              <div class="label-options">
+                @for (label of availableLabels(); track label) {
+                  <button
+                    type="button"
+                    class="label-toggle"
+                    [class.is-selected]="isLabelSelected(label)"
+                    [attr.aria-pressed]="isLabelSelected(label)"
+                    (click)="toggleLabel(label)"
+                  >
+                    {{ label }}
+                  </button>
+                }
+              </div>
+            } @else {
+              <p class="empty-labels">Nie masz jeszcze zadnych etykiet.</p>
+            }
+          </section>
 
           @if (apiError()) {
             <p class="api-error" role="alert">{{ apiError() }}</p>

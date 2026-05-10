@@ -2,33 +2,166 @@
   min-height: 100%;
   display: grid;
   place-items: center;
-  padding: 24px;
+  overflow: hidden;
+  padding: 32px 20px;
   background:
-    linear-gradient(135deg, rgba(10, 104, 255, 0.12), transparent 38%), var(--mat-sys-surface);
+    radial-gradient(circle at 16% 18%, rgba(26, 115, 232, 0.16), transparent 28%),
+    radial-gradient(circle at 82% 76%, rgba(52, 168, 83, 0.13), transparent 30%),
+    linear-gradient(135deg, #f7faff 0%, #ffffff 48%, #f5f7fb 100%);
+}
+
+.login-panel {
+  width: min(100%, 438px);
+  display: grid;
+  gap: 18px;
+}
+
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  gap: 10px;
+  color: #1f2937;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow:
+    0 16px 38px rgba(30, 64, 175, 0.14),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
+.brand-mark span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background:
+    linear-gradient(#ffffff, #ffffff) center 42% / 7px 7px no-repeat,
+    linear-gradient(135deg, #1a73e8, #34a853);
+  box-shadow: 0 8px 18px rgba(26, 115, 232, 0.24);
 }
 
 .login-card {
-  width: min(100%, 420px);
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.login-card mat-card-header {
+  padding: 34px 34px 0;
+}
+
+.login-card mat-card-title {
+  color: #0f172a;
+  font-size: 2rem;
+  font-weight: 750;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.login-card mat-card-subtitle {
+  margin-top: 10px;
+  color: #475569;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.login-card mat-card-content {
+  padding: 26px 34px 34px;
 }
 
 .google-button {
   width: 100%;
-  min-height: 48px;
+  min-height: 54px;
+  border-radius: 999px;
+  background: #0b57d0;
+  box-shadow: 0 14px 28px rgba(11, 87, 208, 0.24);
+  color: #ffffff;
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.google-button:hover:not(:disabled) {
+  background: #0a4ebd;
+  box-shadow: 0 18px 34px rgba(11, 87, 208, 0.3);
+  transform: translateY(-1px);
+}
+
+.google-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.google-button:disabled {
+  opacity: 0.72;
+  box-shadow: none;
 }
 
 .google-mark {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   display: inline-grid;
   place-items: center;
-  margin-right: 8px;
+  flex: 0 0 26px;
+  margin-right: 10px;
   border-radius: 50%;
-  background: var(--mat-sys-surface);
-  color: #1a73e8;
-  font-weight: 700;
+  background: #ffffff;
+}
+
+.google-mark svg {
+  width: 17px;
+  height: 17px;
+  display: block;
 }
 
 .error-message {
   margin: 16px 0 0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(186, 26, 26, 0.08);
   color: var(--mat-sys-error);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+@media (max-width: 520px) {
+  .login-shell {
+    padding: 24px 16px;
+  }
+
+  .login-panel {
+    gap: 16px;
+  }
+
+  .login-card {
+    border-radius: 24px;
+  }
+
+  .login-card mat-card-header {
+    padding: 28px 24px 0;
+  }
+
+  .login-card mat-card-title {
+    font-size: 1.72rem;
+  }
+
+  .login-card mat-card-content {
+    padding: 22px 24px 28px;
+  }
 }

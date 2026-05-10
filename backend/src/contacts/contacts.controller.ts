@@ -12,6 +12,7 @@ import {
 import type { Request, Response } from 'express';
 import { AuthService } from '../auth/auth.service';
 import { ContactsService } from './contacts.service';
+import { CreateLabelDto } from './dto/create-label.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 
@@ -46,6 +47,33 @@ export class ContactsController {
     );
 
     return this.contactsService.findDeletedForUser(userId);
+  }
+
+  @Get('labels')
+  async findLabels(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const userId = await this.authService.getAuthenticatedUserId(
+      request,
+      response,
+    );
+
+    return this.contactsService.findLabelsForUser(userId);
+  }
+
+  @Post('labels')
+  async createLabel(
+    @Body() createLabelDto: CreateLabelDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const userId = await this.authService.getAuthenticatedUserId(
+      request,
+      response,
+    );
+
+    return this.contactsService.createLabelForUser(userId, createLabelDto);
   }
 
   @Get(':id')

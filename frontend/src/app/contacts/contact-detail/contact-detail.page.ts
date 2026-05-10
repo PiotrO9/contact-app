@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +25,7 @@ import { Contact, ContactsApiService } from '../contacts-api.service';
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    RouterLink,
   ],
   templateUrl: './contact-detail.page.html',
   styleUrl: './contact-detail.page.css',
@@ -41,6 +42,7 @@ export class ContactDetailPage implements OnInit {
   protected readonly isEditing = signal(false);
   protected readonly apiError = signal('');
   protected readonly notFound = signal(false);
+  protected readonly availableLabels = signal<string[]>([]);
   protected isSubmitting = false;
   protected readonly relationshipOptions = [
     'Mama',
@@ -71,6 +73,7 @@ export class ContactDetailPage implements OnInit {
     phone: new FormControl('', { nonNullable: true }),
     note: new FormControl('', { nonNullable: true }),
     relationship: new FormControl('', { nonNullable: true }),
+    labels: new FormControl<string[]>([], { nonNullable: true }),
   });
 
   ngOnInit(): void {
@@ -94,6 +97,10 @@ export class ContactDetailPage implements OnInit {
         finalize(() => this.isLoading.set(false)),
       )
       .subscribe();
+
+    this.contactsApi.getLabels().subscribe((labels) => {
+      this.availableLabels.set(labels.map((label) => label.name));
+    });
   }
 
   protected startEdit(contact: Contact): void {
@@ -104,7 +111,9 @@ export class ContactDetailPage implements OnInit {
       phone: contact.phone ?? '',
       note: contact.note ?? '',
       relationship: contact.relationship ?? '',
+      labels: contact.labels ?? [],
     });
+    this.mergeAvailableLabels(contact.labels ?? []);
     this.isEditing.set(true);
   }
 
@@ -122,7 +131,7 @@ export class ContactDetailPage implements OnInit {
     }
 
     this.isSubmitting = true;
-    const { name, email, phone, note, relationship } = this.form.getRawValue();
+    const { name, email, phone, note, relationship, labels } = this.form.getRawValue();
 
     this.contactsApi
       .updateContact(contact.id, {
@@ -131,6 +140,7 @@ export class ContactDetailPage implements OnInit {
         phone: this.emptyToNull(phone),
         note: this.emptyToNull(note),
         relationship: this.emptyToNull(relationship),
+        labels,
       })
       .pipe(
         switchMap(() => this.loadContact(contact.id)),
@@ -173,6 +183,20 @@ export class ContactDetailPage implements OnInit {
     });
   }
 
+  protected isLabelSelected(label: string): boolean {
+    return this.form.controls.labels.value.includes(label);
+  }
+
+  protected toggleLabel(label: string): void {
+    const selectedLabels = this.form.controls.labels.value;
+    const nextLabels = selectedLabels.includes(label)
+      ? selectedLabels.filter((selectedLabel) => selectedLabel !== label)
+      : [...selectedLabels, label];
+
+    this.form.controls.labels.setValue(nextLabels);
+    this.form.controls.labels.markAsDirty();
+  }
+
   protected getInitials(contact: Contact): string {
     const initials = contact.name
       .split(' ')
@@ -197,10 +221,25 @@ export class ContactDetailPage implements OnInit {
     return trimmedValue ? trimmedValue : null;
   }
 
+  private mergeAvailableLabels(labels: string[]): void {
+    const labelsByName = new Map<string, string>();
+
+    [...this.availableLabels(), ...labels].forEach((label) => {
+      const trimmedLabel = label.trim();
+
+      if (trimmedLabel && !labelsByName.has(trimmedLabel.toLowerCase())) {
+        labelsByName.set(trimmedLabel.toLowerCase(), trimmedLabel);
+      }
+    });
+
+    this.availableLabels.set([...labelsByName.values()].sort());
+  }
+
   private loadContact(id: string) {
     return this.contactsApi.getContact(id).pipe(
       tap((contact) => {
         this.contact.set(contact);
+        this.mergeAvailableLabels(contact.labels ?? []);
         this.title.setTitle(`${contact.name} | Kontakty`);
       }),
     );

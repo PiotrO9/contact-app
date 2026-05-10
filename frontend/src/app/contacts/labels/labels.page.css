@@ -1,0 +1,152 @@
+.labels-page {
+  min-height: calc(100vh - 100px);
+}
+
+.labels-panel {
+  min-height: calc(100vh - 100px);
+  padding: 24px 24px 32px;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.page-actions {
+  margin-bottom: 24px;
+}
+
+.labels-header {
+  max-width: 680px;
+}
+
+h1 {
+  margin: 0;
+  color: #202124;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.labels-header p {
+  margin: 8px 0 0;
+  color: #5f6368;
+  font-size: 15px;
+}
+
+.label-workspace {
+  max-width: 760px;
+  margin-top: 28px;
+}
+
+.label-form {
+  display: grid;
+  grid-template-columns: minmax(260px, 420px) max-content;
+  align-items: start;
+  gap: 12px;
+}
+
+.label-form button {
+  min-width: 132px;
+  min-height: 56px;
+  justify-self: start;
+  white-space: nowrap;
+}
+
+.api-error {
+  margin: 0 0 18px;
+  color: #c5221f;
+  font-size: 14px;
+}
+
+.state {
+  min-height: 136px;
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+  border-top: 1px solid #f1f3f4;
+  color: #5f6368;
+}
+
+.loading-state {
+  justify-content: center;
+}
+
+.empty-state {
+  grid-template-columns: 48px minmax(0, 1fr);
+  justify-content: start;
+  text-align: left;
+}
+
+.state mat-icon {
+  width: 40px;
+  height: 40px;
+  color: #1a73e8;
+  font-size: 40px;
+}
+
+.state h2 {
+  margin: 0;
+  color: #202124;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.label-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+  border-top: 1px solid #f1f3f4;
+  padding-top: 22px;
+}
+
+.label-chip {
+  min-height: 34px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #d2e3fc;
+  border-radius: 17px;
+  padding: 5px 14px 5px 10px;
+  background: #e8f0fe;
+  color: #174ea6;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.label-chip mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+@media (max-width: 700px) {
+  .labels-panel {
+    min-height: calc(100vh - 80px);
+    padding: 18px 14px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  .label-form {
+    grid-template-columns: 1fr;
+  }
+
+  .label-form button {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .empty-state {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+}

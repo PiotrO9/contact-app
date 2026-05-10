@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard, loginGuard } from './auth/auth.guard';
 import { ContactDetailPage } from './contacts/contact-detail/contact-detail.page';
 import { ContactListComponent } from './contacts/contact-list/contact-list.component';
+import { LabelsPage } from './contacts/labels/labels.page';
 import { NewContactPage } from './contacts/new-contact/new-contact.page';
 import { LayoutComponent } from './layout/layout.component';
 import { LoginPage } from './login/login.page';
@@ -51,6 +52,11 @@ export const routes: Routes = [
         path: 'contacts/new',
         component: NewContactPage,
         title: 'Nowy kontakt | Kontakty',
+      },
+      {
+        path: 'labels',
+        component: LabelsPage,
+        title: 'Etykiety | Kontakty',
       },
       {
         path: 'contacts/:id',

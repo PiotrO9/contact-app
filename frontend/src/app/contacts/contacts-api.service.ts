@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export type Contact = {
@@ -10,9 +10,15 @@ export type Contact = {
   phone: string | null;
   note: string | null;
   relationship: string | null;
+  labels: string[];
   avatarUrl?: string | null;
   isFavorite: boolean;
   deletedAt?: string | null;
+};
+
+export type ContactLabel = {
+  id: string;
+  name: string;
 };
 
 export type CreateContactDto = {
@@ -29,6 +35,7 @@ export type UpdateContactDto = Partial<{
   note: string | null;
   relationship: string | null;
   isFavorite: boolean;
+  labels: string[];
 }>;
 
 @Injectable({
@@ -37,6 +44,8 @@ export type UpdateContactDto = Partial<{
 export class ContactsApiService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
+  private readonly labelsChangedSubject = new Subject<void>();
+  readonly labelsChanged$ = this.labelsChangedSubject.asObservable();
 
   getContacts(): Observable<Contact[]> {
     return this.http.get<Contact[]>(`${this.apiUrl}/contacts`, {
@@ -54,6 +63,18 @@ export class ContactsApiService {
     return this.http.get<Contact>(`${this.apiUrl}/contacts/${id}`, {
       withCredentials: true,
     });
+  }
+
+  getLabels(): Observable<ContactLabel[]> {
+    return this.http.get<ContactLabel[]>(`${this.apiUrl}/contacts/labels`, {
+      withCredentials: true,
+    });
+  }
+
+  createLabel(name: string): Observable<ContactLabel> {
+    return this.http
+      .post<ContactLabel>(`${this.apiUrl}/contacts/labels`, { name }, { withCredentials: true })
+      .pipe(tap(() => this.labelsChangedSubject.next()));
   }
 
   createContact(contact: CreateContactDto): Observable<Contact> {

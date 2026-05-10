@@ -1,0 +1,57 @@
+<section class="labels-page">
+  <div class="labels-panel">
+    <div class="page-actions">
+      <button matButton type="button" class="back-button" (click)="backToContacts()">
+        <mat-icon>arrow_back</mat-icon>
+        Kontakty
+      </button>
+    </div>
+
+    <header class="labels-header">
+      <h1>Etykiety</h1>
+      <p>Tworz etykiety, ktore pozniej przypiszesz do kontaktow w edycji.</p>
+    </header>
+
+    <section class="label-workspace">
+      <form class="label-form" (submit)="submit($event)">
+        <mat-form-field appearance="outline">
+          <mat-label>Nazwa etykiety</mat-label>
+          <input matInput type="text" [formControl]="labelControl" />
+          <mat-error>Nazwa etykiety jest wymagana</mat-error>
+        </mat-form-field>
+
+        <button matButton="filled" type="submit" [disabled]="labelControl.invalid || isSubmitting">
+          <mat-icon>add</mat-icon>
+          Utworz
+        </button>
+      </form>
+
+      @if (apiError()) {
+        <p class="api-error" role="alert">{{ apiError() }}</p>
+      }
+
+      @if (isLoading()) {
+        <div class="state loading-state" aria-label="Ladowanie etykiet">
+          <mat-spinner diameter="32" />
+        </div>
+      } @else if (labels().length === 0) {
+        <div class="state empty-state">
+          <mat-icon aria-hidden="true">label</mat-icon>
+          <div>
+            <h2>Brak etykiet</h2>
+            <p>Utworz pierwsza etykiete, aby przypisac ja do kontaktu.</p>
+          </div>
+        </div>
+      } @else {
+        <div class="label-list" aria-label="Lista etykiet">
+          @for (label of labels(); track label.id) {
+            <span class="label-chip">
+              <mat-icon aria-hidden="true">label</mat-icon>
+              {{ label.name }}
+            </span>
+          }
+        </div>
+      }
+    </section>
+  </div>
+</section>

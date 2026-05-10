@@ -41,7 +41,7 @@
   line-height: 1.2;
 }
 
-.section-heading button {
+.section-heading a {
   width: 36px;
   height: 36px;
   display: grid;
@@ -51,9 +51,11 @@
   background: transparent;
   color: #3c4043;
   cursor: pointer;
+  text-decoration: none;
 }
 
-.section-heading button:hover {
+.section-heading a:hover,
+.section-heading a.active {
   background: #e9eef6;
 }
 
@@ -143,5 +145,4 @@
   .nav-item.primary-action {
     margin-bottom: 8px;
   }
-
 }

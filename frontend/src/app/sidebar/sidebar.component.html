@@ -38,16 +38,26 @@
     <section class="label-section" aria-labelledby="labels-heading">
       <div class="section-heading">
         <h2 id="labels-heading">Etykiety</h2>
-        <button type="button" aria-label="Dodaj etykiete" (click)="addLabel()">
+        <a
+          routerLink="/labels"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          aria-label="Dodaj etykiete"
+        >
           <mat-icon aria-hidden="true">add</mat-icon>
-        </button>
+        </a>
       </div>
 
       @for (label of labels(); track label) {
-        <button class="nav-item label-item" type="button">
+        <a
+          class="nav-item label-item"
+          routerLink="/contacts"
+          [queryParams]="{ label }"
+          [class.active]="isLabelActive(label)"
+        >
           <mat-icon aria-hidden="true">label</mat-icon>
           <span>{{ label }}</span>
-        </button>
+        </a>
       }
     </section>
 

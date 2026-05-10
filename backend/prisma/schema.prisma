@@ -14,18 +14,42 @@ datasource db {
 }
 
 model Contact {
-  id         String   @id @default(uuid())
-  userId     String
-  name       String
-  email      String?
-  phone      String?
+  id           String         @id @default(uuid())
+  userId       String
+  name         String
+  email        String?
+  phone        String?
   note         String?
   relationship String?
-  isFavorite   Boolean   @default(false)
+  isFavorite   Boolean        @default(false)
   deletedAt    DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  labels       ContactLabel[]
 
   @@index([userId])
   @@index([userId, deletedAt])
+}
+
+model Label {
+  id        String         @id @default(uuid())
+  userId    String
+  name      String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  contacts  ContactLabel[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model ContactLabel {
+  contactId  String
+  labelId    String
+  assignedAt DateTime @default(now())
+  contact    Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  label      Label    @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, labelId])
+  @@index([labelId])
 }
