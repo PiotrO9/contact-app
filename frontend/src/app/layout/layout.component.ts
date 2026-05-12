@@ -5,6 +5,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../auth/auth.service';
 import { SearchService } from '../search.service';
+import { hideBrokenAvatar } from '../shared/contact-ui.helpers';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
@@ -19,6 +20,7 @@ export class LayoutComponent {
 
   protected readonly user = this.authService.user;
   protected readonly searchQuery = this.searchService.query;
+  protected readonly hideBrokenAvatar = hideBrokenAvatar;
   protected readonly isMobile = signal(this.matchesMobileViewport());
   protected readonly sidebarOpen = signal(!this.isMobile());
 
@@ -50,13 +52,6 @@ export class LayoutComponent {
     const input = event.target as HTMLInputElement;
 
     this.searchService.setQuery(input.value);
-  }
-
-  protected hideBrokenAvatar(event: Event): void {
-    const image = event.target as HTMLImageElement;
-
-    image.classList.add('is-hidden');
-    image.setAttribute('aria-hidden', 'true');
   }
 
   private matchesMobileViewport(): boolean {

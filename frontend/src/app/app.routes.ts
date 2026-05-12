@@ -1,66 +1,71 @@
 import { Routes } from '@angular/router';
 import { authGuard, loginGuard } from './auth/auth.guard';
-import { ContactDetailPage } from './contacts/contact-detail/contact-detail.page';
-import { ContactListComponent } from './contacts/contact-list/contact-list.component';
-import { LabelsPage } from './contacts/labels/labels.page';
-import { NewContactPage } from './contacts/new-contact/new-contact.page';
-import { LayoutComponent } from './layout/layout.component';
-import { LoginPage } from './login/login.page';
+
+const loadContactDetailPage = () =>
+  import('./contacts/contact-detail/contact-detail.page').then((m) => m.ContactDetailPage);
+const loadContactListComponent = () =>
+  import('./contacts/contact-list/contact-list.component').then((m) => m.ContactListComponent);
+const loadLabelsPage = () => import('./contacts/labels/labels.page').then((m) => m.LabelsPage);
+const loadLayoutComponent = () =>
+  import('./layout/layout.component').then((m) => m.LayoutComponent);
+const loadLoginPage = () => import('./login/login.page').then((m) => m.LoginPage);
+const loadNewContactPage = () =>
+  import('./contacts/new-contact/new-contact.page').then((m) => m.NewContactPage);
 
 export const routes: Routes = [
   {
     path: 'login',
-    component: LoginPage,
+    loadComponent: loadLoginPage,
     canActivate: [loginGuard],
     title: 'Logowanie | Kontakty',
   },
   {
     path: '',
-    component: LayoutComponent,
+    loadComponent: loadLayoutComponent,
     canActivate: [authGuard],
     children: [
       {
         path: '',
-        component: ContactListComponent,
+        loadComponent: loadContactListComponent,
         pathMatch: 'full',
         title: 'Kontakty',
       },
       {
         path: 'contacts',
-        component: ContactListComponent,
+        loadComponent: loadContactListComponent,
         title: 'Kontakty',
       },
       {
         path: 'contacts/favorites',
-        component: ContactListComponent,
+        loadComponent: loadContactListComponent,
         data: { favoritesOnly: true },
         title: 'Ulubione kontakty | Kontakty',
       },
       {
         path: 'contacts/family',
-        component: ContactListComponent,
+        loadComponent: loadContactListComponent,
         data: { familyOnly: true },
         title: 'Rodzina | Kontakty',
       },
       {
         path: 'contacts/trash',
-        component: ContactListComponent,
+        loadComponent: loadContactListComponent,
         data: { trashOnly: true },
         title: 'Kosz | Kontakty',
       },
       {
         path: 'contacts/new',
-        component: NewContactPage,
+        loadComponent: loadNewContactPage,
         title: 'Nowy kontakt | Kontakty',
       },
       {
         path: 'labels',
-        component: LabelsPage,
+        loadComponent: loadLabelsPage,
         title: 'Etykiety | Kontakty',
       },
       {
         path: 'contacts/:id',
-        component: ContactDetailPage,
+        loadComponent: loadContactDetailPage,
         title: 'Szczegoly kontaktu | Kontakty',
       },
     ],

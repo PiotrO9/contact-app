@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { catchError, filter, finalize, of, switchMap, tap } from 'rxjs';
+import { getInitials, hideBrokenAvatar } from '../../shared/contact-ui.helpers';
+import { getHttpErrorMessage } from '../../shared/http-error-message';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { Contact, ContactsApiService } from '../contacts-api.service';
 
@@ -75,6 +77,8 @@ export class ContactDetailPage implements OnInit {
     relationship: new FormControl('', { nonNullable: true }),
     labels: new FormControl<string[]>([], { nonNullable: true }),
   });
+  protected readonly getInitials = getInitials;
+  protected readonly hideBrokenAvatar = hideBrokenAvatar;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -88,7 +92,7 @@ export class ContactDetailPage implements OnInit {
     this.loadContact(id)
       .pipe(
         catchError((error: unknown) => {
-          if (error instanceof HttpErrorResponse && error.status === 404) {
+          if (this.isHttpNotFound(error)) {
             this.notFound.set(true);
           }
 
@@ -150,7 +154,12 @@ export class ContactDetailPage implements OnInit {
         next: () => {
           this.isEditing.set(false);
         },
-        error: (error: unknown) => this.apiError.set(this.getErrorMessage(error)),
+        error: (error: unknown) =>
+          this.apiError.set(
+            getHttpErrorMessage(error, 'Nie udalo sie zapisac kontaktu. Sprobuj ponownie.', {
+              badRequestMessage: 'Sprawdz poprawnosc danych i sprobuj ponownie.',
+            }),
+          ),
       });
   }
 
@@ -197,24 +206,6 @@ export class ContactDetailPage implements OnInit {
     this.form.controls.labels.markAsDirty();
   }
 
-  protected getInitials(contact: Contact): string {
-    const initials = contact.name
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part.charAt(0).toUpperCase())
-      .join('');
-
-    return initials || '?';
-  }
-
-  protected hideBrokenAvatar(event: Event): void {
-    const image = event.target as HTMLImageElement;
-
-    image.classList.add('is-hidden');
-    image.setAttribute('aria-hidden', 'true');
-  }
-
   private emptyToNull(value: string): string | null {
     const trimmedValue = value.trim();
 
@@ -245,25 +236,7 @@ export class ContactDetailPage implements OnInit {
     );
   }
 
-  private getErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'Nie udalo sie zapisac kontaktu. Sprobuj ponownie.';
-    }
-
-    const responseMessage = error.error?.message;
-
-    if (Array.isArray(responseMessage) && responseMessage.length > 0) {
-      return responseMessage.join(' ');
-    }
-
-    if (typeof responseMessage === 'string' && responseMessage.trim()) {
-      return responseMessage;
-    }
-
-    if (error.status === 400) {
-      return 'Sprawdz poprawnosc danych i sprobuj ponownie.';
-    }
-
-    return 'Nie udalo sie zapisac kontaktu. Sprobuj ponownie.';
+  private isHttpNotFound(error: unknown): boolean {
+    return error instanceof HttpErrorResponse && error.status === 404;
   }
 }

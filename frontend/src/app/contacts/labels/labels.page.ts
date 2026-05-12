@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
+import { getHttpErrorMessage } from '../../shared/http-error-message';
 import { ContactLabel, ContactsApiService } from '../contacts-api.service';
 
 @Component({
@@ -61,7 +61,10 @@ export class LabelsPage implements OnInit {
           this.labels.update((labels) => this.mergeLabels(labels, label));
           this.labelControl.reset('');
         },
-        error: (error: unknown) => this.apiError.set(this.getErrorMessage(error)),
+        error: (error: unknown) =>
+          this.apiError.set(
+            getHttpErrorMessage(error, 'Nie udalo sie zapisac etykiety. Sprobuj ponownie.'),
+          ),
       });
   }
 
@@ -84,23 +87,5 @@ export class LabelsPage implements OnInit {
     }
 
     return [...labels, nextLabel].sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  private getErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'Nie udalo sie zapisac etykiety. Sprobuj ponownie.';
-    }
-
-    const responseMessage = error.error?.message;
-
-    if (Array.isArray(responseMessage) && responseMessage.length > 0) {
-      return responseMessage.join(' ');
-    }
-
-    if (typeof responseMessage === 'string' && responseMessage.trim()) {
-      return responseMessage;
-    }
-
-    return 'Nie udalo sie zapisac etykiety. Sprobuj ponownie.';
   }
 }

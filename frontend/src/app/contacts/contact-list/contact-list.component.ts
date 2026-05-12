@@ -1,12 +1,5 @@
-import {
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -14,8 +7,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
-import { filter, finalize, switchMap } from 'rxjs';
+import { filter, finalize, map, switchMap } from 'rxjs';
 import { SearchService } from '../../search.service';
+import {
+  getInitials,
+  hideBrokenAvatar,
+  normalizeSearchText,
+} from '../../shared/contact-ui.helpers';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog/confirm-delete-dialog.component';
 import { ConfirmRestoreDialogComponent } from '../confirm-restore-dialog/confirm-restore-dialog.component';
 import { Contact, ContactsApiService } from '../contacts-api.service';
@@ -55,15 +53,18 @@ export class ContactListComponent implements OnInit {
   protected readonly contacts = signal<Contact[]>([]);
   protected readonly isImporting = signal(false);
   protected readonly isLoading = signal(true);
-  protected readonly selectedLabel = signal('');
+  protected readonly selectedLabel = toSignal(
+    this.route.queryParamMap.pipe(map((queryParams) => queryParams.get('label') ?? '')),
+    { initialValue: this.route.snapshot.queryParamMap.get('label') ?? '' },
+  );
   protected readonly favoritesOnly = computed(
     () => this.route.snapshot.data['favoritesOnly'] === true,
   );
   protected readonly familyOnly = computed(() => this.route.snapshot.data['familyOnly'] === true);
   protected readonly trashOnly = computed(() => this.route.snapshot.data['trashOnly'] === true);
   protected readonly visibleContacts = computed(() => {
-    const query = this.normalizeSearchText(this.searchService.query());
-    const label = this.normalizeSearchText(this.selectedLabel());
+    const query = normalizeSearchText(this.searchService.query());
+    const label = normalizeSearchText(this.selectedLabel());
     const routeContacts = this.familyOnly()
       ? this.contacts().filter((contact) => Boolean(contact.relationship))
       : this.favoritesOnly()
@@ -72,7 +73,7 @@ export class ContactListComponent implements OnInit {
     const contacts = label
       ? routeContacts.filter((contact) =>
           (contact.labels ?? []).some(
-            (contactLabel) => this.normalizeSearchText(contactLabel) === label,
+            (contactLabel) => normalizeSearchText(contactLabel) === label,
           ),
         )
       : routeContacts;
@@ -82,7 +83,7 @@ export class ContactListComponent implements OnInit {
     }
 
     return contacts.filter((contact) =>
-      this.normalizeSearchText(
+      normalizeSearchText(
         [contact.name, contact.email, contact.phone, contact.relationship]
           .concat(contact.labels ?? [])
           .filter(Boolean)
@@ -144,9 +145,6 @@ export class ContactListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe((queryParams) => {
-      this.selectedLabel.set(queryParams.get('label') ?? '');
-    });
     this.loadContacts();
   }
 
@@ -282,29 +280,6 @@ export class ContactListComponent implements OnInit {
     });
   }
 
-  protected getInitials(contact: Contact): string {
-    const initials = contact.name
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part.charAt(0).toUpperCase())
-      .join('');
-
-    return initials || '?';
-  }
-
-  protected hideBrokenAvatar(event: Event): void {
-    const image = event.target as HTMLImageElement;
-
-    image.classList.add('is-hidden');
-    image.setAttribute('aria-hidden', 'true');
-  }
-
-  private normalizeSearchText(value: string): string {
-    return value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
-  }
+  protected readonly getInitials = getInitials;
+  protected readonly hideBrokenAvatar = hideBrokenAvatar;
 }

@@ -4,6 +4,11 @@ import { CreateLabelDto } from './dto/create-label.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 
+type ContactsDbClient = Pick<
+  PrismaService,
+  'contact' | 'contactLabel' | 'label'
+>;
+
 type ImportedContactDto = {
   name: string;
   email: string;
@@ -98,15 +103,17 @@ export class ContactsService {
   }
 
   private async syncLabelsForContact(
+    db: ContactsDbClient,
     userId: string,
     contactId: string,
     labels: string[],
   ) {
     const normalizedLabels = this.normalizeLabels(labels);
+    const labelRecords = [];
 
-    const labelRecords = await Promise.all(
-      normalizedLabels.map((name) =>
-        this.prisma.label.upsert({
+    for (const name of normalizedLabels) {
+      labelRecords.push(
+        await db.label.upsert({
           where: {
             userId_name: {
               userId,
@@ -119,10 +126,10 @@ export class ContactsService {
           },
           update: {},
         }),
-      ),
-    );
+      );
+    }
 
-    await this.prisma.contactLabel.deleteMany({
+    await db.contactLabel.deleteMany({
       where: { contactId },
     });
 
@@ -130,7 +137,7 @@ export class ContactsService {
       return;
     }
 
-    await this.prisma.contactLabel.createMany({
+    await db.contactLabel.createMany({
       data: labelRecords.map((label) => ({
         contactId,
         labelId: label.id,
@@ -164,86 +171,133 @@ export class ContactsService {
     return this.toContactResponse(contact);
   }
 
-  createForUser(userId: string, dto: CreateContactDto) {
-    return this.prisma.contact
-      .create({
+  async createForUser(userId: string, dto: CreateContactDto) {
+    const contact = await this.prisma.$transaction(async (tx) => {
+      const createdContact = await tx.contact.create({
         data: {
           userId,
           name: dto.name,
           email: dto.email || null,
           phone: dto.phone || null,
           note: dto.note || null,
+          relationship: dto.relationship || null,
+          isFavorite: dto.isFavorite ?? false,
         },
+      });
+
+      if (dto.labels !== undefined) {
+        await this.syncLabelsForContact(
+          tx,
+          userId,
+          createdContact.id,
+          dto.labels,
+        );
+      }
+
+      return tx.contact.findFirst({
+        where: { id: createdContact.id, userId, deletedAt: null },
         include: this.contactLabelsInclude,
-      })
-      .then((contact) => this.toContactResponse(contact));
+      });
+    });
+
+    if (!contact) {
+      throw new NotFoundException('Contact not found');
+    }
+
+    return this.toContactResponse(contact);
   }
 
   async upsertImportedContactForUser(userId: string, dto: ImportedContactDto) {
-    const existingContact = await this.prisma.contact.findFirst({
-      where: {
-        userId,
-        email: {
-          equals: dto.email,
-          mode: 'insensitive',
+    const contact = await this.prisma.$transaction(async (tx) => {
+      const existingContact = await tx.contact.findFirst({
+        where: {
+          userId,
+          email: {
+            equals: dto.email,
+            mode: 'insensitive',
+          },
+          deletedAt: null,
         },
-        deletedAt: null,
-      },
+      });
+
+      const savedContact = existingContact
+        ? await tx.contact.update({
+            where: { id: existingContact.id },
+            data: {
+              name: dto.name,
+              email: dto.email,
+              phone: dto.phone,
+              note: dto.note,
+              relationship: dto.relationship,
+              isFavorite: dto.isFavorite,
+            },
+          })
+        : await tx.contact.create({
+            data: {
+              userId,
+              name: dto.name,
+              email: dto.email,
+              phone: dto.phone,
+              note: dto.note,
+              relationship: dto.relationship,
+              isFavorite: dto.isFavorite,
+            },
+          });
+
+      await this.syncLabelsForContact(tx, userId, savedContact.id, dto.labels);
+
+      return tx.contact.findFirst({
+        where: { id: savedContact.id, userId, deletedAt: null },
+        include: this.contactLabelsInclude,
+      });
     });
 
-    const contact = existingContact
-      ? await this.prisma.contact.update({
-          where: { id: existingContact.id },
-          data: {
-            name: dto.name,
-            email: dto.email,
-            phone: dto.phone,
-            note: dto.note,
-            relationship: dto.relationship,
-            isFavorite: dto.isFavorite,
-          },
-          include: this.contactLabelsInclude,
-        })
-      : await this.prisma.contact.create({
-          data: {
-            userId,
-            name: dto.name,
-            email: dto.email,
-            phone: dto.phone,
-            note: dto.note,
-            relationship: dto.relationship,
-            isFavorite: dto.isFavorite,
-          },
-          include: this.contactLabelsInclude,
-        });
+    if (!contact) {
+      throw new NotFoundException('Contact not found');
+    }
 
-    await this.syncLabelsForContact(userId, contact.id, dto.labels);
-
-    return this.findOneForUser(userId, contact.id);
+    return this.toContactResponse(contact);
   }
 
   async updateForUser(userId: string, id: string, dto: UpdateContactDto) {
-    await this.findOneForUser(userId, id);
+    const contact = await this.prisma.$transaction(async (tx) => {
+      const existingContact = await tx.contact.findFirst({
+        where: { id, userId, deletedAt: null },
+      });
 
-    await this.prisma.contact.update({
-      where: { id },
-      data: {
-        ...(dto.name !== undefined && { name: dto.name }),
-        ...(dto.email !== undefined && { email: dto.email || null }),
-        ...(dto.phone !== undefined && { phone: dto.phone || null }),
-        ...(dto.note !== undefined && { note: dto.note || null }),
-        ...(dto.relationship !== undefined && {
-          relationship: dto.relationship || null,
-        }),
-        ...(dto.isFavorite !== undefined && { isFavorite: dto.isFavorite }),
-      },
+      if (!existingContact) {
+        throw new NotFoundException('Contact not found');
+      }
+
+      await tx.contact.update({
+        where: { id },
+        data: {
+          ...(dto.name !== undefined && { name: dto.name }),
+          ...(dto.email !== undefined && { email: dto.email || null }),
+          ...(dto.phone !== undefined && { phone: dto.phone || null }),
+          ...(dto.note !== undefined && { note: dto.note || null }),
+          ...(dto.relationship !== undefined && {
+            relationship: dto.relationship || null,
+          }),
+          ...(dto.isFavorite !== undefined && { isFavorite: dto.isFavorite }),
+        },
+      });
+
+      if (dto.labels !== undefined) {
+        await this.syncLabelsForContact(tx, userId, id, dto.labels);
+      }
+
+      return tx.contact.findFirst({
+        where: { id, userId, deletedAt: null },
+        include: this.contactLabelsInclude,
+      });
     });
 
-    if (dto.labels !== undefined) {
-      await this.syncLabelsForContact(userId, id, dto.labels);
+    if (!contact) {
+      throw new NotFoundException('Contact not found');
     }
 
-    return this.findOneForUser(userId, id);
+    return this.toContactResponse(contact);
   }
 
   async deleteForUser(userId: string, id: string) {

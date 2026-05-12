@@ -1,4 +1,6 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
+import { Observable, catchError, firstValueFrom, of, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export type AuthUser = {
@@ -12,6 +14,8 @@ export type AuthUser = {
   providedIn: 'root',
 })
 export class AuthService {
+  constructor(private readonly http: HttpClient) {}
+
   readonly user = signal<AuthUser | null>(null);
 
   async isAuthenticated(): Promise<boolean> {
@@ -25,27 +29,36 @@ export class AuthService {
   }
 
   async signOut(): Promise<void> {
-    await fetch(`${environment.apiUrl}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
+    await firstValueFrom(
+      this.http
+        .post(`${environment.apiUrl}/auth/logout`, null, {
+          withCredentials: true,
+        })
+        .pipe(catchError((error: unknown) => this.handleNonNetworkAuthError(error))),
+    );
 
     this.user.set(null);
   }
 
   async loadUser(): Promise<AuthUser | null> {
-    const response = await fetch(`${environment.apiUrl}/auth/me`, {
-      credentials: 'include',
-    });
+    const data = await firstValueFrom(
+      this.http
+        .get<{ user: AuthUser | null }>(`${environment.apiUrl}/auth/me`, {
+          withCredentials: true,
+        })
+        .pipe(catchError((error: unknown) => this.handleNonNetworkAuthError(error))),
+    );
 
-    if (!response.ok) {
-      this.user.set(null);
-      return null;
-    }
-
-    const data = (await response.json()) as { user: AuthUser | null };
     this.user.set(data.user);
 
     return data.user;
+  }
+
+  private handleNonNetworkAuthError(error: unknown): Observable<{ user: null }> {
+    if (error instanceof HttpErrorResponse && error.status !== 0) {
+      return of({ user: null });
+    }
+
+    return throwError(() => error);
   }
 }

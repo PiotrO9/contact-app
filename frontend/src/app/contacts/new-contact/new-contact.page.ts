@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
+import { getHttpErrorMessage } from '../../shared/http-error-message';
 import { ContactsApiService } from '../contacts-api.service';
 
 @Component({
@@ -67,29 +67,12 @@ export class NewContactPage {
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: () => void this.router.navigate(['/']),
-        error: (error: unknown) => this.apiError.set(this.getErrorMessage(error)),
+        error: (error: unknown) =>
+          this.apiError.set(
+            getHttpErrorMessage(error, 'Nie udalo sie zapisac kontaktu. Sprobuj ponownie.', {
+              badRequestMessage: 'Sprawdz poprawnosc danych i sprobuj ponownie.',
+            }),
+          ),
       });
-  }
-
-  private getErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'Nie udalo sie zapisac kontaktu. Sprobuj ponownie.';
-    }
-
-    const responseMessage = error.error?.message;
-
-    if (Array.isArray(responseMessage) && responseMessage.length > 0) {
-      return responseMessage.join(' ');
-    }
-
-    if (typeof responseMessage === 'string' && responseMessage.trim()) {
-      return responseMessage;
-    }
-
-    if (error.status === 400) {
-      return 'Sprawdz poprawnosc danych i sprobuj ponownie.';
-    }
-
-    return 'Nie udalo sie zapisac kontaktu. Sprobuj ponownie.';
   }
 }

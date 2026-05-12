@@ -1,4 +1,12 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayUnique,
+  IsArray,
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateContactDto {
   @IsString()
@@ -16,4 +24,18 @@ export class CreateContactDto {
   @IsOptional()
   @IsString()
   note?: string | null;
+
+  @IsOptional()
+  @IsString()
+  relationship?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  isFavorite?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  labels?: string[];
 }
